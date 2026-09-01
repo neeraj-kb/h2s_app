@@ -1048,6 +1048,135 @@
     }
 
     /* ================================================================
+       EXPERIMENTS DASHBOARD
+       ================================================================ */
+    #view-experiments {
+      gap: 16px;
+    }
+
+    .exp-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .exp-toolbar h2 {
+      flex: 1;
+    }
+
+    .exp-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .exp-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .exp-form-grid .input-group.span-2 {
+      grid-column: 1 / -1;
+    }
+
+    .exp-chart-wrap {
+      background: var(--ink-soft);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+    }
+
+    .exp-chart-wrap .chart-caption {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      opacity: 0.5;
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    #exp-chart {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .exp-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 20px;
+    }
+
+    .exp-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: var(--ink-soft);
+      border: 1px solid var(--glass-border);
+    }
+
+    .exp-swatch {
+      width: 30px;
+      height: 30px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--glass-border);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .exp-item-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .exp-item-title {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .exp-item-meta {
+      font-size: 0.75rem;
+      opacity: 0.55;
+      margin-top: 3px;
+      line-height: 1.5;
+    }
+
+    .exp-item-notes {
+      font-size: 0.78rem;
+      opacity: 0.7;
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    .exp-item-del {
+      background: none;
+      border: none;
+      color: var(--danger-glow);
+      opacity: 0.6;
+      font-size: 0.9rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      padding: 4px;
+    }
+
+    .exp-item-del:hover {
+      opacity: 1;
+    }
+
+    .exp-empty {
+      text-align: center;
+      padding: 40px 16px;
+      opacity: 0.4;
+    }
+
+    /* ================================================================
        UTILITY
        ================================================================ */
     .gap-8 {
@@ -1147,9 +1276,14 @@
         </div>
       </div>
 
-      <button id="btn-history" class="btn btn-secondary btn-sm" style="align-self: center; margin-top: 8px;">
-        View History
-      </button>
+      <div style="display: flex; gap: 8px; align-self: center; margin-top: 8px;">
+        <button id="btn-history" class="btn btn-secondary btn-sm">
+          View History
+        </button>
+        <button id="btn-experiments" class="btn btn-secondary btn-sm">
+          Experiments
+        </button>
+      </div>
     </div>
 
     <!-- ──────────── VIEW 2: Camera Capture ──────────── -->
@@ -1297,6 +1431,79 @@
 
       <div class="history-back-row">
         <button id="btn-history-back" class="btn btn-secondary btn-block btn-sm">← Back</button>
+      </div>
+    </div>
+
+    <!-- ──────────── VIEW 7: Experiments Dashboard ──────────── -->
+    <div id="view-experiments" class="view">
+      <div class="exp-toolbar">
+        <h2>Experiments</h2>
+        <button id="btn-exp-export-csv" class="btn btn-secondary btn-sm">Export CSV</button>
+      </div>
+      <p style="font-size: 0.78rem; opacity: 0.55; margin-top: -8px;">
+        Controlled-exposure test runs used to build and validate the calibration table — separate
+        from worker field readings in History.
+      </p>
+
+      <button id="btn-exp-add-toggle" class="btn btn-primary btn-block btn-sm">+ Log new experiment</button>
+
+      <div id="exp-form-card" class="glass-card exp-form hidden">
+        <div class="exp-form-grid">
+          <div class="input-group">
+            <label for="exp-batch">Strip batch ID</label>
+            <input id="exp-batch" class="input-field" type="text" placeholder="e.g. BATCH-03">
+          </div>
+          <div class="input-group">
+            <label for="exp-target-ppmh">Target dose (ppm·h)</label>
+            <input id="exp-target-ppmh" class="input-field" type="number" step="0.1" placeholder="e.g. 20">
+          </div>
+          <div class="input-group">
+            <label for="exp-duration">Exposure duration (h)</label>
+            <input id="exp-duration" class="input-field" type="number" step="0.1" placeholder="e.g. 4">
+          </div>
+          <div class="input-group">
+            <label for="exp-conc">Chamber conc. (ppm)</label>
+            <input id="exp-conc" class="input-field" type="number" step="0.1" placeholder="e.g. 5">
+          </div>
+          <div class="input-group">
+            <label for="exp-temp">Chamber temp (°C)</label>
+            <input id="exp-temp" class="input-field" type="number" step="0.5" placeholder="e.g. 30">
+          </div>
+          <div class="input-group">
+            <label for="exp-rh">Chamber RH (%)</label>
+            <input id="exp-rh" class="input-field" type="number" step="1" placeholder="e.g. 60">
+          </div>
+          <div class="input-group">
+            <label for="exp-rgb">Measured strip color (R,G,B)</label>
+            <input id="exp-rgb" class="input-field" type="text" placeholder="e.g. 160,130,100">
+          </div>
+          <div class="input-group">
+            <label for="exp-operator">Operator</label>
+            <input id="exp-operator" class="input-field" type="text" placeholder="Initials">
+          </div>
+          <div class="input-group span-2">
+            <label for="exp-notes">Notes</label>
+            <input id="exp-notes" class="input-field" type="text" placeholder="Anything unusual about this run">
+          </div>
+        </div>
+        <button id="btn-exp-save" class="btn btn-primary btn-block">Save experiment</button>
+      </div>
+
+      <div class="exp-chart-wrap">
+        <canvas id="exp-chart" width="360" height="180"></canvas>
+        <div class="chart-caption">Darkness signal vs. target dose — should trend monotonically if the calibration curve
+          is behaving.</div>
+      </div>
+
+      <div class="exp-list" id="exp-list">
+        <div class="exp-empty" id="exp-empty">
+          <div class="empty-icon">🧪</div>
+          <p>No experiments logged yet.</p>
+        </div>
+      </div>
+
+      <div class="history-back-row">
+        <button id="btn-exp-back" class="btn btn-secondary btn-block btn-sm">← Back</button>
       </div>
     </div>
 
@@ -1526,47 +1733,78 @@
 
 
       /* ==============================================================
-         STORAGE MODULE  (window.storage prototype shim)
+         STORAGE MODULE
          ============================================================== */
+      // Generic key-value layer backed by real localStorage (works in any
+      // deployed browser — no build step, no server). Falls back to an
+      // in-memory Map only if localStorage is unavailable (e.g. private
+      // browsing with storage disabled), so data survives a page reload
+      // in the normal case. In a Stage-2 build, swap this module for
+      // IndexedDB (see AGENT.md) without touching any of its callers.
+      const _memoryFallback = new Map();
+      let _localStorageOK = null;
 
-      // Provide a simple in-memory + window.storage shim.
-      // In production this becomes IndexedDB via `idb`.
-      const STORAGE_KEY = 'setu_readings';
-
-      function _getStore() {
+      function _hasLocalStorage() {
+        if (_localStorageOK !== null) return _localStorageOK;
         try {
-          const raw = (window.storage && window.storage.getItem)
-            ? window.storage.getItem(STORAGE_KEY)
-            : null;
-          return raw ? JSON.parse(raw) : [];
+          const t = '__setu_probe__';
+          window.localStorage.setItem(t, '1');
+          window.localStorage.removeItem(t);
+          _localStorageOK = true;
+        } catch {
+          _localStorageOK = false;
+        }
+        return _localStorageOK;
+      }
+
+      function _loadKey(key) {
+        try {
+          if (_hasLocalStorage()) {
+            const raw = window.localStorage.getItem(key);
+            return raw ? JSON.parse(raw) : [];
+          }
+          return _memoryFallback.get(key) || [];
         } catch {
           return [];
         }
       }
 
-      function _setStore(data) {
+      function _saveKey(key, data) {
         try {
-          if (window.storage && window.storage.setItem) {
-            window.storage.setItem(STORAGE_KEY, JSON.stringify(data));
+          if (_hasLocalStorage()) {
+            window.localStorage.setItem(key, JSON.stringify(data));
+          } else {
+            _memoryFallback.set(key, data);
           }
-        } catch { /* silently fail in prototype */ }
+        } catch { /* storage full or unavailable — fail silently in prototype */ }
       }
 
-      // In-memory fallback when window.storage is unavailable
-      let _memoryStore = null;
+      function downloadCSV(filename, header, rows) {
+        const blob = new Blob([header + rows.join('\n')], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // -- Readings (field use) --
+      const READINGS_KEY = 'setu_readings';
+      let _readingsCache = null;
 
       function getReadings() {
-        if (_memoryStore !== null) return _memoryStore;
-        const stored = _getStore();
-        _memoryStore = stored;
-        return stored;
+        if (_readingsCache === null) _readingsCache = _loadKey(READINGS_KEY);
+        return _readingsCache;
       }
 
       function saveReading(data) {
         const readings = getReadings();
         readings.unshift(data); // newest first
-        _memoryStore = readings;
-        _setStore(readings);
+        _readingsCache = readings;
+        _saveKey(READINGS_KEY, readings);
       }
 
       function exportCSV(readings) {
@@ -1582,17 +1820,50 @@
             r.badgeValid,
             r.expiryConfidence,
           ].join(',')
-        ).join('\n');
+        );
+        downloadCSV('setu_readings_' + new Date().toISOString().slice(0, 10) + '.csv', header, rows);
+      }
 
-        const blob = new Blob([header + rows], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'setu_readings_' + new Date().toISOString().slice(0, 10) + '.csv';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+      // -- Experiments (lab calibration runs) --
+      const EXPERIMENTS_KEY = 'setu_experiments';
+      let _experimentsCache = null;
+
+      function getExperiments() {
+        if (_experimentsCache === null) _experimentsCache = _loadKey(EXPERIMENTS_KEY);
+        return _experimentsCache;
+      }
+
+      function saveExperiment(data) {
+        const experiments = getExperiments();
+        experiments.unshift(data); // newest first
+        _experimentsCache = experiments;
+        _saveKey(EXPERIMENTS_KEY, experiments);
+      }
+
+      function deleteExperiment(id) {
+        const experiments = getExperiments().filter(e => e.id !== id);
+        _experimentsCache = experiments;
+        _saveKey(EXPERIMENTS_KEY, experiments);
+      }
+
+      function exportExperimentsCSV(experiments) {
+        const header = 'timestamp,batch_id,target_ppmh,duration_h,chamber_conc_ppm,chamber_temp_c,chamber_rh_pct,measured_rgb,darkness_signal,operator,notes\n';
+        const rows = experiments.map(e =>
+          [
+            e.timestamp,
+            '"' + (e.batch || '').replace(/"/g, '""') + '"',
+            e.targetPpmH,
+            e.durationH,
+            e.chamberConc,
+            e.chamberTemp,
+            e.chamberRh,
+            '"' + e.rgb.join(',') + '"',
+            e.darkness.toFixed(1),
+            '"' + (e.operator || '').replace(/"/g, '""') + '"',
+            '"' + (e.notes || '').replace(/"/g, '""') + '"',
+          ].join(',')
+        );
+        downloadCSV('setu_experiments_' + new Date().toISOString().slice(0, 10) + '.csv', header, rows);
       }
 
 
@@ -1611,12 +1882,23 @@
         processing: $('#view-processing'),
         results: $('#view-results'),
         history: $('#view-history'),
+        experiments: $('#view-experiments'),
       };
 
       const workerIdInput = $('#worker-id');
       const shiftSelect = $('#shift-select');
       const btnStartCapture = $('#btn-start-capture');
       const btnHistory = $('#btn-history');
+      const btnExperiments = $('#btn-experiments');
+
+      const btnExpAddToggle = $('#btn-exp-add-toggle');
+      const expFormCard = $('#exp-form-card');
+      const btnExpSave = $('#btn-exp-save');
+      const btnExpBack = $('#btn-exp-back');
+      const btnExpExportCSV = $('#btn-exp-export-csv');
+      const expList = $('#exp-list');
+      const expEmpty = $('#exp-empty');
+      const expChartCanvas = $('#exp-chart');
 
       const videoEl = $('#camera-video');
       const btnCameraBack = $('#btn-camera-back');
@@ -2046,6 +2328,160 @@
         if (readings.length === 0) return;
         exportCSV(readings);
       });
+
+      // -- Experiments dashboard --
+      function darknessOf(rgb) {
+        const lum = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
+        return 255 - lum;
+      }
+
+      btnExperiments.addEventListener('click', () => {
+        renderExperiments();
+        showView('experiments');
+      });
+
+      btnExpBack.addEventListener('click', () => {
+        expFormCard.classList.add('hidden');
+        showView('welcome');
+      });
+
+      btnExpAddToggle.addEventListener('click', () => {
+        expFormCard.classList.toggle('hidden');
+      });
+
+      btnExpSave.addEventListener('click', () => {
+        const rgbRaw = $('#exp-rgb').value.split(',').map(v => parseInt(v.trim(), 10));
+        if (rgbRaw.length !== 3 || rgbRaw.some(isNaN)) {
+          $('#exp-rgb').style.borderColor = 'var(--danger-glow)';
+          return;
+        }
+        $('#exp-rgb').style.borderColor = '';
+
+        const entry = {
+          id: 'exp_' + Date.now(),
+          timestamp: new Date().toISOString(),
+          batch: $('#exp-batch').value.trim() || 'UNSPECIFIED',
+          targetPpmH: parseFloat($('#exp-target-ppmh').value) || 0,
+          durationH: parseFloat($('#exp-duration').value) || 0,
+          chamberConc: parseFloat($('#exp-conc').value) || 0,
+          chamberTemp: parseFloat($('#exp-temp').value) || 0,
+          chamberRh: parseFloat($('#exp-rh').value) || 0,
+          rgb: rgbRaw,
+          darkness: darknessOf(rgbRaw),
+          operator: $('#exp-operator').value.trim(),
+          notes: $('#exp-notes').value.trim(),
+        };
+
+        saveExperiment(entry);
+
+        // Reset form
+        ['exp-batch', 'exp-target-ppmh', 'exp-duration', 'exp-conc', 'exp-temp', 'exp-rh', 'exp-rgb', 'exp-operator', 'exp-notes']
+          .forEach(id => { $('#' + id).value = ''; });
+        expFormCard.classList.add('hidden');
+
+        renderExperiments();
+      });
+
+      btnExpExportCSV.addEventListener('click', () => {
+        const experiments = getExperiments();
+        if (experiments.length === 0) return;
+        exportExperimentsCSV(experiments);
+      });
+
+      function renderExperiments() {
+        const experiments = getExperiments();
+        expList.innerHTML = '';
+
+        if (experiments.length === 0) {
+          expList.innerHTML =
+            '<div class="exp-empty">' +
+            '<div class="empty-icon">🧪</div>' +
+            '<p>No experiments logged yet.</p>' +
+            '</div>';
+        } else {
+          experiments.forEach(e => {
+            const dt = new Date(e.timestamp);
+            const dateStr = dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const el = document.createElement('div');
+            el.className = 'exp-item';
+            el.innerHTML =
+              '<div class="exp-swatch" style="background: rgb(' + e.rgb.join(',') + ')"></div>' +
+              '<div class="exp-item-body">' +
+              '<div class="exp-item-title">' + escapeHtml(e.batch) + ' · target ' + e.targetPpmH + ' ppm·h</div>' +
+              '<div class="exp-item-meta">' +
+              e.durationH + 'h @ ' + e.chamberConc + ' ppm · ' + e.chamberTemp + '°C / ' + e.chamberRh + '%RH · ' + dateStr +
+              (e.operator ? ' · ' + escapeHtml(e.operator) : '') +
+              '</div>' +
+              (e.notes ? '<div class="exp-item-notes">' + escapeHtml(e.notes) + '</div>' : '') +
+              '</div>' +
+              '<button class="exp-item-del" data-id="' + e.id + '" title="Delete">✕</button>';
+            expList.appendChild(el);
+          });
+
+          expList.querySelectorAll('.exp-item-del').forEach(btn => {
+            btn.addEventListener('click', () => {
+              deleteExperiment(btn.dataset.id);
+              renderExperiments();
+            });
+          });
+        }
+
+        drawExperimentsChart(experiments);
+      }
+
+      function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      }
+
+      function drawExperimentsChart(experiments) {
+        const ctx = expChartCanvas.getContext('2d');
+        const w = expChartCanvas.width, h = expChartCanvas.height;
+        const pad = 28;
+        ctx.clearRect(0, 0, w, h);
+
+        // Axes
+        ctx.strokeStyle = 'rgba(242,239,230,0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(pad, 8); ctx.lineTo(pad, h - pad); ctx.lineTo(w - 8, h - pad);
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(242,239,230,0.4)';
+        ctx.font = '9px monospace';
+        ctx.fillText('darkness', 2, 14);
+        ctx.fillText('dose (ppm·h) →', w - 100, h - 8);
+
+        if (experiments.length === 0) return;
+
+        const maxDose = Math.max(...experiments.map(e => e.targetPpmH), 1);
+        const maxDarkness = 255;
+
+        const toX = v => pad + (v / maxDose) * (w - pad - 16);
+        const toY = v => (h - pad) - (v / maxDarkness) * (h - pad - 16);
+
+        // Sort by dose for a connecting line
+        const sorted = [...experiments].sort((a, b) => a.targetPpmH - b.targetPpmH);
+        ctx.strokeStyle = 'rgba(214,154,45,0.5)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        sorted.forEach((e, i) => {
+          const x = toX(e.targetPpmH), y = toY(e.darkness);
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        // Points
+        experiments.forEach(e => {
+          const x = toX(e.targetPpmH), y = toY(e.darkness);
+          ctx.fillStyle = 'rgb(' + e.rgb.join(',') + ')';
+          ctx.beginPath();
+          ctx.arc(x, y, 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(242,239,230,0.6)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        });
+      }
 
       // -- Helpers --
       function delay(ms) {
