@@ -86,10 +86,11 @@
        PLACEHOLDER DATA WARNING BANNER
        ================================================================ */
     #warning-banner {
-      position: fixed;
+      position: sticky;
       top: 0;
       left: 0;
       right: 0;
+      width: 100%;
       z-index: 1000;
       background: linear-gradient(135deg, var(--amber-deep), var(--amber));
       color: var(--ink);
@@ -97,18 +98,17 @@
       font-size: 0.72rem;
       font-weight: 600;
       text-align: center;
-      padding: 6px 16px;
+      padding: 7px 16px;
       letter-spacing: 0.02em;
-      line-height: 1.4;
+      line-height: 1.35;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
     }
 
     #warning-banner .warning-icon {
       margin-right: 4px;
     }
 
-    /* Push content below banner */
     #app {
-      padding-top: 36px;
       position: relative;
       z-index: 1;
       min-height: calc(100dvh - 36px);
@@ -295,25 +295,30 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
+      min-width: 0;
     }
 
     .input-group label {
       font-family: var(--font-mono);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      opacity: 0.7;
+      letter-spacing: 0.06em;
+      opacity: 0.75;
+      word-break: break-word;
     }
 
     .input-field {
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
       background: var(--ink-soft);
       border: 1px solid var(--glass-border);
       border-radius: var(--radius-md);
       color: var(--paper);
       font-family: var(--font-body);
-      font-size: 1rem;
-      padding: 14px 16px;
+      font-size: 0.95rem;
+      padding: 12px 14px;
       outline: none;
       transition: border-color 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
     }
@@ -1079,17 +1084,28 @@
     .exp-form {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
 
     .exp-form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 12px;
     }
 
     .exp-form-grid .input-group.span-2 {
       grid-column: 1 / -1;
+    }
+
+    @media (max-width: 540px) {
+      .exp-form-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .exp-form-grid .input-group.span-2 {
+        grid-column: 1;
+      }
     }
 
     .exp-chart-wrap {
