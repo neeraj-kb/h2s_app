@@ -588,15 +588,12 @@
     }
 
     .calibrate-chips {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 16px;
       display: flex;
-      gap: 10px;
+      gap: 8px;
       justify-content: center;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
+      align-items: center;
+      width: 100%;
+      flex-wrap: wrap;
     }
 
     .calibrate-chip {
@@ -704,14 +701,28 @@
       bottom: 0;
       left: 0;
       right: 0;
-      padding: 16px;
-      padding-bottom: 36px;
+      padding: 16px 16px max(18px, env(safe-area-inset-bottom, 18px));
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.55) 70%, transparent 100%);
+      z-index: 10;
+    }
+
+    .calibrate-actions {
       display: flex;
       gap: 10px;
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .calibrate-actions .btn {
+      flex: 1;
       justify-content: center;
-      align-items: flex-end;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, transparent 100%);
-      flex-direction: column;
+      text-align: center;
+      padding: 10px 12px;
+      font-size: 0.85rem;
     }
 
     /* ================================================================
@@ -1338,11 +1349,10 @@
               <span class="swatch-preview hidden" id="swatch-expiry"></span>
             </div>
           </div>
-          <div style="display:flex;gap:10px;width:100%;">
-            <button id="btn-calibrate-back" class="btn btn-secondary btn-sm" style="flex:1;">← Retake</button>
-            <button id="btn-calibrate-undo" class="btn btn-secondary btn-sm" style="flex:1;" disabled>Undo</button>
-            <button id="btn-calibrate-confirm" class="btn btn-primary btn-sm" style="flex:1;" disabled>Analyze
-              →</button>
+          <div class="calibrate-actions">
+            <button id="btn-calibrate-back" class="btn btn-secondary btn-sm">← Retake</button>
+            <button id="btn-calibrate-undo" class="btn btn-secondary btn-sm" disabled>Undo</button>
+            <button id="btn-calibrate-confirm" class="btn btn-primary btn-sm" disabled>Analyze →</button>
           </div>
         </div>
       </div>
