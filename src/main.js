@@ -32,6 +32,7 @@ import {
   displayResults,
   renderHistoryList,
   renderExperimentsList,
+  renderAdminTelemetry,
   darknessOf,
   delay,
 } from './ui/views.js';
@@ -72,6 +73,14 @@ const btnSaveReading = $('#btn-save-reading');
 const btnNewReading = $('#btn-new-reading');
 const btnExportCSV = $('#btn-export-csv');
 const btnHistoryBack = $('#btn-history-back');
+
+const btnAdminPortal = $('#btn-admin-portal');
+const btnAdminClose = $('#btn-admin-close');
+const btnAdminBack = $('#btn-admin-back');
+const btnAdminExportCSV = $('#btn-admin-export-csv');
+const adminSearchInput = $('#admin-search-input');
+const adminTabs = $$('.admin-tab');
+let activeAdminTab = 'workers';
 
 // --- Helper Functions ---
 function updateStartBtn() {
@@ -344,6 +353,68 @@ btnExpExportCSV.addEventListener('click', async () => {
   if (experiments.length === 0) return;
   exportExperimentsCSV(experiments);
 });
+
+// --- Admin Telemetry & Badge Control Handlers ---
+async function refreshAdminDashboard() {
+  const readings = await getReadings();
+  const experiments = await getExperiments();
+  const query = adminSearchInput ? adminSearchInput.value : '';
+  renderAdminTelemetry(readings, experiments, query, activeAdminTab);
+}
+
+if (btnAdminPortal) {
+  btnAdminPortal.addEventListener('click', async () => {
+    showView('admin');
+    await refreshAdminDashboard();
+  });
+}
+
+if (btnAdminClose) {
+  btnAdminClose.addEventListener('click', () => {
+    showView('welcome');
+    refreshLastReading();
+  });
+}
+
+if (btnAdminBack) {
+  btnAdminBack.addEventListener('click', () => {
+    showView('welcome');
+    refreshLastReading();
+  });
+}
+
+adminTabs.forEach(tab => {
+  tab.addEventListener('click', async () => {
+    adminTabs.forEach(t => {
+      t.classList.remove('active');
+      t.setAttribute('aria-selected', 'false');
+    });
+    tab.classList.add('active');
+    tab.setAttribute('aria-selected', 'true');
+    activeAdminTab = tab.dataset.tab;
+
+    // Toggle tab panes
+    $$('.admin-tab-pane').forEach(pane => pane.classList.add('hidden'));
+    const targetPane = $(`#pane-${activeAdminTab}`);
+    if (targetPane) targetPane.classList.remove('hidden');
+
+    await refreshAdminDashboard();
+  });
+});
+
+if (adminSearchInput) {
+  adminSearchInput.addEventListener('input', async () => {
+    await refreshAdminDashboard();
+  });
+}
+
+if (btnAdminExportCSV) {
+  btnAdminExportCSV.addEventListener('click', async () => {
+    const readings = await getReadings();
+    if (readings.length === 0) return;
+    exportReadingsCSV(readings);
+  });
+}
 
 // --- Service Worker Registration ---
 function registerServiceWorker() {

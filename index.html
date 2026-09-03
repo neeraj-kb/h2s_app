@@ -35,6 +35,13 @@
 
     <!-- ──────────── VIEW 1: Welcome / Worker Setup ──────────── -->
     <div id="view-welcome" class="view active">
+      <button id="btn-admin-portal" class="admin-portal-btn" aria-label="Admin Telemetry &amp; Badge Control" title="Admin Telemetry &amp; Badge Control">
+        <svg class="admin-shield-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+      </button>
+
       <div class="brand-header">
         <div class="brand-logo">Setu</div>
         <div class="brand-tagline">H₂S Dosimeter Reader</div>
@@ -293,6 +300,91 @@
 
       <div class="history-back-row">
         <button id="btn-exp-back" class="btn btn-secondary btn-block btn-sm">← Back</button>
+      </div>
+    </div>
+
+    <!-- ──────────── VIEW 8: Admin Telemetry & Badge Control ──────────── -->
+    <div id="view-admin" class="view">
+      <div class="admin-header">
+        <div class="admin-header-left">
+          <div class="admin-portal-tag">
+            <span class="portal-dot">●</span> RESEARCHER &amp; SAFETY PORTAL
+          </div>
+          <h1 class="admin-title">Admin Telemetry &amp; Badge Control</h1>
+          <p class="admin-desc">Monitor system-wide scan compliance, worker exposure profiles, and colorimetric badge shelf-life.</p>
+        </div>
+        <button id="btn-admin-close" class="admin-close-btn" aria-label="Close admin portal">✕</button>
+      </div>
+
+      <!-- Segmented Navigation Tabs -->
+      <div class="admin-tabs" role="tablist">
+        <button id="tab-workers" class="admin-tab active" data-tab="workers" role="tab" aria-selected="true">Worker Profiles</button>
+        <button id="tab-badges" class="admin-tab" data-tab="badges" role="tab" aria-selected="false">Badge Records</button>
+        <button id="tab-diagnostics" class="admin-tab" data-tab="diagnostics" role="tab" aria-selected="false">
+          <span class="tab-line">Quality</span>
+          <span class="tab-line">Diagnostics</span>
+        </button>
+      </div>
+
+      <!-- 2x2 Telemetry Metric Cards -->
+      <div class="admin-metrics-grid">
+        <div class="admin-metric-card">
+          <div class="metric-label">TOTAL TELEMETRY SCANS</div>
+          <div class="metric-val" id="admin-stat-scans">0</div>
+          <div class="metric-sub" id="admin-stat-scans-sub">System-wide attempts</div>
+        </div>
+
+        <div class="admin-metric-card">
+          <div class="metric-label">SCAN SUCCESS RATE</div>
+          <div class="metric-val text-mint" id="admin-stat-success">0%</div>
+          <div class="metric-sub" id="admin-stat-success-sub">0 valid / 0 rejected</div>
+        </div>
+
+        <div class="admin-metric-card">
+          <div class="metric-label">ACTIVE BADGE HARDWARE</div>
+          <div class="metric-val text-mint" id="admin-stat-active">0 Valid</div>
+          <div class="metric-sub" id="admin-stat-active-sub">0 near expiry</div>
+        </div>
+
+        <div class="admin-metric-card alert-card">
+          <div class="metric-label">BADGE EXPIRY ALERTS</div>
+          <div class="metric-val text-coral" id="admin-stat-expiry">0 Expired</div>
+          <div class="metric-sub" id="admin-stat-expiry-sub">Requires immediate replacement</div>
+        </div>
+      </div>
+
+      <!-- Search Field -->
+      <div class="admin-search-box">
+        <input id="admin-search-input" class="admin-search-input" type="text" placeholder="Search worker ID or shift" autocomplete="off">
+      </div>
+
+      <!-- Tab 1: Worker Profiles -->
+      <div id="pane-workers" class="admin-tab-pane active">
+        <div id="admin-workers-empty" class="admin-empty-state">
+          No worker scans logged yet — readings saved from the main capture flow will appear here.
+        </div>
+        <div id="admin-workers-list" class="admin-cards-list hidden"></div>
+      </div>
+
+      <!-- Tab 2: Badge Records -->
+      <div id="pane-badges" class="admin-tab-pane hidden">
+        <div id="admin-badges-empty" class="admin-empty-state">
+          No badge hardware records logged yet — batch records from field readings and experiments will appear here.
+        </div>
+        <div id="admin-badges-list" class="admin-cards-list hidden"></div>
+      </div>
+
+      <!-- Tab 3: Quality Diagnostics -->
+      <div id="pane-diagnostics" class="admin-tab-pane hidden">
+        <div class="diagnostics-panel" id="admin-diagnostics-container">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Admin Actions / Back -->
+      <div class="admin-action-row">
+        <button id="btn-admin-export-csv" class="btn btn-secondary btn-sm">Export Telemetry CSV</button>
+        <button id="btn-admin-back" class="btn btn-secondary btn-sm">← Back</button>
       </div>
     </div>
 
