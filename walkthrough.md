@@ -1,54 +1,84 @@
-# Setu — Walkthrough
+# Stage 2 Walkthrough: Vite PWA Scaffold & Modular Architecture
 
-## What was built
+## Summary of Accomplishments
 
-A complete single-file prototype ([index.html](file:///c:/Users/Neeraj/OneDrive/Desktop/H2s_app/h2s_app/index.html)) for the **Setu H₂S Dosimeter Reader** — a companion phone app for passive H₂S dosimeter wristbands.
+Stage 2 has been instantiated following the planned architecture in [AGENT.md](file:///c:/Users/Neeraj/OneDrive/Desktop/H2s_app/h2s_app/AGENT.md). The application has transitioned from a single-file prototype into a modern, modular Progressive Web App (PWA) with offline capabilities, IndexedDB persistence, and an automated unit test suite.
 
-### Architecture
+---
 
-**Single file, zero dependencies** (besides Google Fonts CDN link). ~60KB total. No build step, no npm, no framework — per AGENT.md's "fastest-path-to-working-prototype" directive.
+## What Was Built
 
-### 6 Views (all in-page, JS show/hide)
+### 1. Preserved Single-File Prototype
+- The original single-file prototype was backed up to [index.singlefile.html](file:///c:/Users/Neeraj/OneDrive/Desktop/H2s_app/h2s_app/index.singlefile.html). It remains runnable standalone in any browser with zero installation.
 
-| View | Key Features |
-|---|---|
-| **Welcome** | Worker ID input, shift selector, last-reading summary card |
-| **Camera** | Rear-facing `getUserMedia` viewfinder with badge alignment guide |
-| **Tap-to-Calibrate** | 3-step tap flow (white ref → exposure strip → expiry patch) with visual markers |
-| **Processing** | Animated step-by-step progress (white balance → dose → expiry) |
-| **Results** | Dose range display, risk bar, badge validity, color swatches |
-| **History** | Saved readings list with risk indicators, CSV export |
+### 2. Project & Build Infrastructure
+- [package.json](file:///c:/Users/Neeraj/OneDrive/Desktop/H2s_app/h2s_app/package.json): Added npm scripts:
+  - `npm run dev`: Starts local Vite dev server
+  - `npm run build`: Bundles production assets into `dist/`
+  - `npm run preview`: Previews the production build
+  - `npm run test`: Runs the Vitest test suite
+- [vite.config.js](file:///c:/Users/Neeraj/OneDrive/Desktop/H2s_app/h2s_app/vite.config.js): Configured Vite bundler and Vitest test runner.
+- [.gitignore](file:///c:/Users/Neeraj/OneDrive/Desktop/H2s_app/h2s_app/.gitignore): Excludes `node_modules/` and `dist/`.
 
-### Core Modules (pure functions)
+### 3. Modular Code Architecture (`src/`)
 
-| Module | Functions |
-|---|---|
-| **Colorimetry** | `srgbToLinear`, `linearToSrgb`, `applyWhiteBalance`, `fitChannel`, `estimateDose`, `checkExpiry` |
-| **Camera** | `startCamera`, `stopCamera`, `captureFrame`, `sampleRegion` |
-| **Storage** | `getReadings`, `saveReading`, `exportCSV` |
+```
+src/
+├── main.js                             # Application entry point & lifecycle
+├── capture/
+│   ├── camera.js                       # getUserMedia and canvas capture
+│   └── tapCalibration.js               # Canvas coordinate mapping & circular pixel sampling
+├── colorimetry/
+│   ├── colorCorrection.js              # sRGB <-> linear conversion & white balance
+│   ├── doseEstimate.js                 # Dose estimation (strictly enforces range output)
+│   └── expiryCheck.js                  # Euclidean color distance badge validity check
+├── storage/
+│   ├── db.js                           # idb-backed IndexedDB with auto-migration
+│   └── csvExport.js                    # CSV export for readings and lab experiments
+├── ui/
+│   ├── views.js                        # View controller, DOM binding, and animations
+│   └── components/
+│       └── experimentsChart.js         # Canvas rendering for lab calibration curves
+├── styles/
+│   ├── tokens.css                      # Design system tokens (--ink, --paper, --amber, etc.)
+│   └── app.css                         # UI styling, responsive layout, cards, HUD
+└── sw.js                               # Service Worker reference module
+```
 
-### Domain Constraints Honored
+### 4. Storage & Persistence
+- [src/storage/db.js](file:///c:/Users/Neeraj/OneDrive/Desktop/H2s_app/h2s_app/src/storage/db.js): Replaced `window.storage` shim with a robust IndexedDB layer (`setu_db`) using `idb`. Includes two stores:
+  - `readings`: Worker field logs
+  - `experiments`: Lab calibration runs
+- **Automatic Migration**: Automatically checks for existing `localStorage` prototype data (`setu_readings`, `setu_experiments`) on startup and imports it into IndexedDB.
 
-- ✅ **Dose always a range** — `estimateDose()` returns `{low, high}`, UI shows "X – Y ppm·h"
-- ✅ **Placeholder warning** — non-dismissible amber banner fixed at top of every view
-- ✅ **No localStorage** — uses `window.storage` shim with in-memory fallback
-- ✅ **Pure colorimetry** — zero UI/storage deps in color math functions
-- ✅ **No ML/CNN** — piecewise-linear interpolation only
-- ✅ **No cloud/backend** — fully client-side
-- ✅ **No auto-detection** — manual tap-to-calibrate
+### 5. PWA & Offline Support
+- [public/manifest.webmanifest](file:///c:/Users/Neeraj/OneDrive/Desktop/H2s_app/h2s_app/public/manifest.webmanifest): Configures standalone PWA installation on mobile devices.
+- [public/sw.js](file:///c:/Users/Neeraj/OneDrive/Desktop/H2s_app/h2s_app/public/sw.js): Implements offline caching for app shell and assets for use in remote industrial field conditions without connectivity.
 
-### Design System
+---
 
-- Dark-themed with glassmorphism cards and subtle noise texture
-- Token-accurate colors: ink, paper, amber, safe, danger
-- Fonts: Space Grotesk / Inter / IBM Plex Mono
-- Micro-animations: view transitions, tap marker spring animation, chip pulses, spinner
-- Mobile-first, capped at 420px on larger screens
+## Validation & Test Results
 
-## How to verify
+### 1. Automated Unit Tests (`tests/colorimetry.test.js`)
+Ran `npm.cmd test` using Vitest:
+- **10 of 10 tests passed (100%)**
+- Validated:
+  - `srgbToLinear` and `linearToSrgb` roundtrip and boundary values
+  - `applyWhiteBalance` normalizes colors accurately against reference white
+  - `fitChannel` piecewise interpolation at boundary conditions
+  - **Critical Safety Constraint**: `estimateDose` ALWAYS returns a range `{ low, high, unit: 'ppm·h' }` where `low < high`, and never a single scalar number
+  - Minimum uncertainty margin of at least 0.5 ppm·h
+  - `checkExpiry` detects fresh and expired badges with confidence bounded between 0 and 1
 
-1. Open [index.html](file:///c:/Users/Neeraj/OneDrive/Desktop/H2s_app/h2s_app/index.html) in Chrome/Edge on a device with a camera
-2. Enter any Worker ID → "Start Capture" enables
-3. Grant camera permission → live viewfinder with alignment guide
-4. Capture photo → tap 3 regions → watch processing animation → see dose range result
-5. Save reading → check history → export CSV
+### 2. Production Build (`npm.cmd run build`)
+```
+✓ 15 modules transformed.
+dist/index.html                 13.06 kB │ gzip: 3.27 kB
+dist/assets/index-MeUiiCvE.css  16.58 kB │ gzip: 4.22 kB
+dist/assets/index-BGw78Oij.js   21.23 kB │ gzip: 7.70 kB
+✓ built in 2.43s
+```
+
+### 3. Server Preview & Health Check
+Tested `npm.cmd run preview` on port 4173:
+- Responded with HTTP 200 OK and properly served the modular web application.

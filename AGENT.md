@@ -13,25 +13,17 @@ validity, and logs readings by worker ID/shift for DGMS/OISD-style reporting.
 
 ## Current state
 
-Single-file prototype: `index.html` (HTML + CSS + vanilla JS, no build step, no dependencies
-besides a Google Fonts `<link>`). No backend. No test suite yet. No package.json yet.
-
-Target architecture (not yet scaffolded — see "Planned structure" below): a Vite-built PWA with
-IndexedDB persistence and a service worker for offline field use. Do not assume this structure
-exists in the repo until it's actually been scaffolded — check the current file tree first.
+Stage 2 scaffolded: Vite-built PWA with modular `src/` architecture, IndexedDB persistence (`idb`), service worker (`public/sw.js`), and Vitest unit test suite.
+Single-file fallback preserved: `index.singlefile.html` (zero build step, standalone).
 
 ## Setup / build / test commands
 
-**Right now (single-file stage):** no setup needed. Open `index.html` directly in a browser with
-camera permissions. No install, no build, no test command exists yet.
-
-**Once scaffolded to Vite (see Stage 2 in prior discussion):**
 ```
 npm install
 npm run dev        # local dev server
-npm run build       # production build
-npm run test        # unit tests (colorimetry math)
-npm run preview     # preview production build
+npm run build      # production build
+npm run test       # unit tests (colorimetry math)
+npm run preview    # preview production build
 ```
 If these scripts don't exist yet in `package.json`, don't assume them — check `package.json`
 first, and if a task requires them, set them up as part of the task rather than guessing they're
