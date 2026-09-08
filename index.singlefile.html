@@ -13,10 +13,8 @@
     href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap"
     rel="stylesheet">
   <style>
-    /* ================================================================
-       DESIGN SYSTEM — Tokens
-       ================================================================ */
-    :root {
+/* Setu Design System — Tokens */
+:root {
       --ink: #171A19;
       --ink-soft: #2E3332;
       --paper: #F2EFE6;
@@ -42,11 +40,21 @@
       --radius-lg: 22px;
       --radius-full: 9999px;
 
+      --container-sm: 440px;
+      --container-md: 768px;
+      --container-lg: 1060px;
+      --container-xl: 1200px;
+
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+
       --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
       --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    /* ================================================================
+
+/* ================================================================
        RESET & BASE
        ================================================================ */
     *,
@@ -114,6 +122,22 @@
       min-height: calc(100dvh - 36px);
       display: flex;
       flex-direction: column;
+      width: 100%;
+      max-width: var(--container-xl);
+      margin: 0 auto;
+      padding: 16px 20px;
+    }
+
+    @media (min-width: 768px) {
+      #app {
+        padding: 24px 36px;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      #app {
+        padding: 32px 48px;
+      }
     }
 
     /* ================================================================
@@ -349,13 +373,114 @@
        VIEW 1: WELCOME / WORKER SETUP
        ================================================================ */
     #view-welcome {
+      gap: 16px;
+    }
+
+    .view-top-bar {
+      display: flex;
+      align-items: center;
       justify-content: space-between;
+      width: 100%;
+      margin-bottom: 12px;
+      padding: 2px 0;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-full);
+      padding: 6px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: rgba(242, 239, 230, 0.75);
+      letter-spacing: 0.03em;
+    }
+
+    .sensor-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--safe-glow);
+      box-shadow: 0 0 8px var(--safe-glow);
+      animation: sensorPulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes sensorPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .admin-portal-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: var(--radius-full);
+      background: rgba(45, 212, 191, 0.1);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+      color: #34D399;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s var(--ease-out);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .admin-portal-btn:hover {
+      background: rgba(45, 212, 191, 0.2);
+      border-color: #34D399;
+      color: #FFFFFF;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(45, 212, 191, 0.25);
+    }
+
+    .admin-portal-btn:active {
+      transform: scale(0.96);
+    }
+
+    .admin-btn-text {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    @media (max-width: 480px) {
+      .admin-btn-text {
+        display: none;
+      }
+      .admin-portal-btn {
+        padding: 8px;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        justify-content: center;
+      }
+    }
+
+    .welcome-layout {
+      display: flex;
+      flex-direction: column;
       gap: 24px;
+      width: 100%;
+    }
+
+    .welcome-col-main,
+    .welcome-col-side {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
     .brand-header {
       text-align: center;
-      padding: 20px 0 8px;
+      padding: 12px 0 8px;
     }
 
     .brand-logo {
@@ -371,10 +496,17 @@
 
     .brand-tagline {
       font-family: var(--font-mono);
-      font-size: 0.75rem;
-      opacity: 0.5;
+      font-size: 0.78rem;
+      opacity: 0.6;
       margin-top: 6px;
       letter-spacing: 0.04em;
+    }
+
+    .brand-subtext {
+      font-size: 0.85rem;
+      color: rgba(242, 239, 230, 0.55);
+      margin-top: 8px;
+      line-height: 1.45;
     }
 
     .setup-form {
@@ -383,8 +515,153 @@
       gap: 18px;
     }
 
+    .setup-header-badge {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--amber);
+    }
+
+    .welcome-nav-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 20px;
+    }
+
+    .welcome-nav-card .label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      opacity: 0.5;
+    }
+
+    .welcome-nav-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .nav-tile-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-align: left;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      width: 100%;
+      border: 1px solid var(--glass-border);
+      background: var(--ink-soft);
+      cursor: pointer;
+      transition: all 0.2s var(--ease-out);
+    }
+
+    .nav-tile-btn:hover {
+      background: #383E3D;
+      border-color: rgba(242, 239, 230, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-tile-icon {
+      font-size: 1.35rem;
+      flex-shrink: 0;
+    }
+
+    .nav-tile-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .nav-tile-title {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: var(--paper);
+    }
+
+    .nav-tile-desc {
+      font-size: 0.72rem;
+      color: rgba(242, 239, 230, 0.5);
+    }
+
+    /* Safety guideline card */
+    .safety-guideline-card {
+      padding: 20px;
+    }
+
+    .safety-guideline-card .label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      opacity: 0.5;
+      margin-bottom: 12px;
+    }
+
+    .safety-levels-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .safety-level-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-sm);
+    }
+
+    .safety-level-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-safe { background: var(--safe-glow); box-shadow: 0 0 6px var(--safe-glow); }
+    .dot-caution { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+    .dot-danger { background: var(--danger-glow); box-shadow: 0 0 6px var(--danger-glow); }
+
+    .safety-level-range {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--paper);
+      flex: 1;
+    }
+
+    .safety-level-badge {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-weight: 500;
+    }
+
+    .badge-safe {
+      background: rgba(63, 110, 92, 0.25);
+      color: var(--safe-glow);
+    }
+
+    .badge-caution {
+      background: rgba(214, 154, 45, 0.2);
+      color: var(--amber);
+    }
+
+    .badge-danger {
+      background: rgba(176, 64, 47, 0.25);
+      color: var(--danger-glow);
+    }
+
     .last-reading-card {
-      margin-top: auto;
       padding-top: 16px;
     }
 
@@ -415,6 +692,26 @@
       text-align: right;
     }
 
+    /* Desktop View 1 layout */
+    @media (min-width: 860px) {
+      .welcome-layout {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 32px;
+        align-items: start;
+      }
+      .brand-header {
+        text-align: left;
+        padding: 8px 0 16px;
+      }
+      .brand-logo {
+        font-size: 3.2rem;
+      }
+      .brand-subtext {
+        font-size: 0.95rem;
+      }
+    }
+
     /* ================================================================
        VIEW 2: CAMERA CAPTURE
        ================================================================ */
@@ -423,11 +720,39 @@
       position: relative;
     }
 
+    .camera-stage-wrapper {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
     #view-camera .camera-container {
       position: relative;
       flex: 1;
       background: #000;
       overflow: hidden;
+    }
+
+    @media (min-width: 768px) {
+      #view-camera {
+        padding: 24px;
+        align-items: center;
+        justify-content: center;
+      }
+      .camera-stage-wrapper {
+        max-width: 820px;
+        height: 520px;
+        margin: auto;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--glass-border);
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+      }
+      .camera-stage-wrapper .camera-container {
+        height: 100%;
+        border-radius: var(--radius-lg);
+      }
     }
 
     #camera-video {
@@ -552,12 +877,40 @@
       position: relative;
     }
 
+    .calibrate-stage-wrapper {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
     .calibrate-canvas-wrap {
       position: relative;
       flex: 1;
       background: #000;
       overflow: hidden;
       touch-action: none;
+    }
+
+    @media (min-width: 768px) {
+      #view-calibrate {
+        padding: 24px;
+        align-items: center;
+        justify-content: center;
+      }
+      .calibrate-stage-wrapper {
+        max-width: 960px;
+        height: 580px;
+        margin: auto;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--glass-border);
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+      }
+      .calibrate-stage-wrapper .calibrate-canvas-wrap {
+        height: 100%;
+        border-radius: var(--radius-lg);
+      }
     }
 
     #calibrate-canvas {
@@ -740,6 +1093,18 @@
       text-align: center;
     }
 
+    .processing-card {
+      max-width: 480px;
+      margin: 48px auto;
+      width: 100%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      padding: 40px 28px;
+    }
+
     .processing-spinner {
       width: 80px;
       height: 80px;
@@ -808,6 +1173,49 @@
        ================================================================ */
     #view-results {
       gap: 20px;
+    }
+
+    .results-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .results-col-primary,
+    .results-col-secondary {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    @media (min-width: 800px) {
+      #view-results {
+        max-width: 1000px;
+        margin: 0 auto;
+        width: 100%;
+      }
+      .results-layout {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 24px;
+        align-items: stretch;
+      }
+      .dose-card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 40px 32px;
+      }
+      .dose-value {
+        font-size: 3.4rem;
+      }
+      .result-actions {
+        max-width: 500px;
+        margin: 16px auto 0;
+        width: 100%;
+      }
     }
 
     .result-header {
@@ -967,10 +1375,17 @@
       gap: 16px;
     }
 
+    .view-subtitle {
+      font-size: 0.8rem;
+      opacity: 0.55;
+      margin-top: 2px;
+    }
+
     .history-toolbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 16px;
     }
 
     .history-list {
@@ -980,6 +1395,23 @@
       flex: 1;
       overflow-y: auto;
       padding-bottom: 20px;
+    }
+
+    @media (min-width: 768px) {
+      #view-history {
+        max-width: 1100px;
+        margin: 0 auto;
+        width: 100%;
+      }
+      .history-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 14px;
+        align-content: start;
+      }
+      .history-item {
+        height: 100%;
+      }
     }
 
     .history-empty {
@@ -1068,6 +1500,37 @@
        ================================================================ */
     #view-experiments {
       gap: 16px;
+    }
+
+    .experiments-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .experiments-col-form,
+    .experiments-col-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    @media (min-width: 880px) {
+      #view-experiments {
+        max-width: 1160px;
+        margin: 0 auto;
+        width: 100%;
+      }
+      .experiments-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+        align-items: start;
+      }
+      .exp-list {
+        max-height: 600px;
+      }
     }
 
     .exp-toolbar {
@@ -1245,52 +1708,51 @@
       }
     }
 
-    /* Larger screens — constrain width */
-    @media (min-width: 480px) {
-      #app {
-        max-width: 420px;
-        margin: 0 auto;
-      }
-    }
-
     /* ================================================================
        VIEW 8: ADMIN TELEMETRY & BADGE CONTROL (RESEARCHER PORTAL)
        ================================================================ */
-    .admin-portal-btn {
-      position: absolute;
-      top: 12px;
-      right: 14px;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(242, 239, 230, 0.12);
-      color: rgba(242, 239, 230, 0.75);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s var(--ease-out);
-      z-index: 10;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    }
-
-    .admin-portal-btn:hover {
-      background: rgba(255, 255, 255, 0.14);
-      border-color: rgba(242, 239, 230, 0.25);
-      color: var(--paper);
-      transform: scale(1.05);
-    }
-
-    .admin-portal-btn:active {
-      transform: scale(0.95);
-    }
-
     #view-admin {
       padding-top: 14px;
       gap: 16px;
+    }
+
+    .admin-controls-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      #view-admin {
+        max-width: 1160px;
+        margin: 0 auto;
+        width: 100%;
+        padding-top: 24px;
+      }
+      .admin-controls-bar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .admin-search-box {
+        max-width: 320px;
+      }
+      .admin-metrics-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+      }
+      .admin-cards-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 12px;
+        max-height: 520px;
+      }
+      .diagnostics-panel {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
     }
 
     .admin-header {
@@ -1611,6 +2073,8 @@
       margin-top: 8px;
       padding-bottom: 20px;
     }
+
+
   </style>
 </head>
 
@@ -1631,110 +2095,161 @@
 
     <!-- ──────────── VIEW 1: Welcome / Worker Setup ──────────── -->
     <div id="view-welcome" class="view active">
-      <button id="btn-admin-portal" class="admin-portal-btn" aria-label="Admin Telemetry &amp; Badge Control" title="Admin Telemetry &amp; Badge Control">
-        <svg class="admin-shield-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          <path d="m9 12 2 2 4-4"/>
-        </svg>
-      </button>
-
-      <div class="brand-header">
-        <div class="brand-logo">Setu</div>
-        <div class="brand-tagline">H₂S Dosimeter Reader</div>
-      </div>
-
-      <div class="glass-card setup-form">
-        <div class="input-group">
-          <label for="worker-id">Worker ID</label>
-          <input id="worker-id" class="input-field" type="text" placeholder="e.g. WKR-0042" autocomplete="off">
+      <header class="view-top-bar">
+        <div class="status-pill">
+          <span class="sensor-dot"></span>
+          <span class="status-pill-text">Dosimeter Scanner Online</span>
         </div>
-        <div class="input-group">
-          <label for="shift-select">Shift</label>
-          <select id="shift-select" class="input-field">
-            <option value="morning">Morning</option>
-            <option value="afternoon">Afternoon</option>
-            <option value="night">Night</option>
-          </select>
-        </div>
-        <button id="btn-start-capture" class="btn btn-primary btn-block" disabled>
-          Start Capture
+        <button id="btn-admin-portal" class="admin-portal-btn" aria-label="Admin Telemetry &amp; Badge Control" title="Admin Telemetry &amp; Badge Control">
+          <svg class="admin-shield-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+          <span class="admin-btn-text">Safety Portal</span>
         </button>
-      </div>
+      </header>
 
-      <div id="last-reading-section" class="last-reading-card glass-card hidden">
-        <div class="label">Last Reading</div>
-        <div class="last-reading-summary">
-          <div class="last-reading-dose" id="last-reading-dose">—</div>
-          <div class="last-reading-meta" id="last-reading-meta">—</div>
-        </div>
-      </div>
+      <div class="welcome-layout">
+        <div class="welcome-col-main">
+          <div class="brand-header">
+            <div class="brand-logo">Setu</div>
+            <div class="brand-tagline">H₂S Dosimeter Reader</div>
+            <p class="brand-subtext">Passive colorimetric exposure analysis &amp; cumulative dose monitoring</p>
+          </div>
 
-      <div style="display: flex; gap: 8px; align-self: center; margin-top: 8px;">
-        <button id="btn-history" class="btn btn-secondary btn-sm">
-          View History
-        </button>
-        <button id="btn-experiments" class="btn btn-secondary btn-sm">
-          Experiments
-        </button>
+          <div class="glass-card setup-form">
+            <div class="setup-header-badge">Worker Sign-In</div>
+            <div class="input-group">
+              <label for="worker-id">Worker ID</label>
+              <input id="worker-id" class="input-field" type="text" placeholder="e.g. WKR-0042" autocomplete="off">
+            </div>
+            <div class="input-group">
+              <label for="shift-select">Shift</label>
+              <select id="shift-select" class="input-field">
+                <option value="morning">Morning</option>
+                <option value="afternoon">Afternoon</option>
+                <option value="night">Night</option>
+              </select>
+            </div>
+            <button id="btn-start-capture" class="btn btn-primary btn-block" disabled>
+              Start Capture
+            </button>
+          </div>
+        </div>
+
+        <div class="welcome-col-side">
+          <div id="last-reading-section" class="last-reading-card glass-card hidden">
+            <div class="label">Last Reading</div>
+            <div class="last-reading-summary">
+              <div class="last-reading-dose" id="last-reading-dose">—</div>
+              <div class="last-reading-meta" id="last-reading-meta">—</div>
+            </div>
+          </div>
+
+          <div class="glass-card welcome-nav-card">
+            <div class="label">System Modules</div>
+            <div class="welcome-nav-buttons">
+              <button id="btn-history" class="btn btn-secondary nav-tile-btn">
+                <span class="nav-tile-icon">📋</span>
+                <span class="nav-tile-content">
+                  <span class="nav-tile-title">View History</span>
+                  <span class="nav-tile-desc">Worker scan logs &amp; CSV export</span>
+                </span>
+              </button>
+              <button id="btn-experiments" class="btn btn-secondary nav-tile-btn">
+                <span class="nav-tile-icon">🧪</span>
+                <span class="nav-tile-content">
+                  <span class="nav-tile-title">Experiments</span>
+                  <span class="nav-tile-desc">Chamber calibration test runs</span>
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div class="glass-card safety-guideline-card">
+            <div class="label">Safety Thresholds (OSHA/DGMS)</div>
+            <div class="safety-levels-list">
+              <div class="safety-level-item">
+                <span class="safety-level-dot dot-safe"></span>
+                <span class="safety-level-range">0 – 5 ppm·h</span>
+                <span class="safety-level-badge badge-safe">Safe Baseline</span>
+              </div>
+              <div class="safety-level-item">
+                <span class="safety-level-dot dot-caution"></span>
+                <span class="safety-level-range">5 – 20 ppm·h</span>
+                <span class="safety-level-badge badge-caution">Caution (PEL)</span>
+              </div>
+              <div class="safety-level-item">
+                <span class="safety-level-dot dot-danger"></span>
+                <span class="safety-level-range">&gt; 20 ppm·h</span>
+                <span class="safety-level-badge badge-danger">Danger (STEL)</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- ──────────── VIEW 2: Camera Capture ──────────── -->
     <div id="view-camera" class="view">
-      <div class="camera-container">
-        <video id="camera-video" autoplay playsinline muted></video>
-        <div class="camera-overlay">
-          <div class="camera-guide">
-            <div class="camera-guide-label">Align badge inside frame</div>
+      <div class="camera-stage-wrapper">
+        <div class="camera-container">
+          <video id="camera-video" autoplay playsinline muted></video>
+          <div class="camera-overlay">
+            <div class="camera-guide">
+              <div class="camera-guide-label">Align badge inside frame</div>
+            </div>
           </div>
-        </div>
-        <div class="camera-controls">
-          <button id="btn-camera-back" class="camera-back-btn" aria-label="Go back">←</button>
-          <button id="btn-capture" class="capture-btn" aria-label="Capture photo"></button>
-          <div style="width:44px;"></div><!-- spacer -->
-        </div>
-        <div id="camera-error" class="camera-error hidden">
-          <div class="error-icon">📷</div>
-          <p>Camera access is required to photograph the dosimeter badge. Please grant camera permission and reload.</p>
-          <button id="btn-camera-retry" class="btn btn-primary btn-sm">Retry</button>
+          <div class="camera-controls">
+            <button id="btn-camera-back" class="camera-back-btn" aria-label="Go back">←</button>
+            <button id="btn-capture" class="capture-btn" aria-label="Capture photo"></button>
+            <div style="width:44px;"></div><!-- spacer -->
+          </div>
+          <div id="camera-error" class="camera-error hidden">
+            <div class="error-icon">📷</div>
+            <p>Camera access is required to photograph the dosimeter badge. Please grant camera permission and reload.</p>
+            <button id="btn-camera-retry" class="btn btn-primary btn-sm">Retry</button>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- ──────────── VIEW 3: Tap-to-Calibrate ──────────── -->
     <div id="view-calibrate" class="view">
-      <div class="calibrate-canvas-wrap" id="calibrate-wrap">
-        <canvas id="calibrate-canvas"></canvas>
-        <!-- Tap markers get appended here -->
+      <div class="calibrate-stage-wrapper">
+        <div class="calibrate-canvas-wrap" id="calibrate-wrap">
+          <canvas id="calibrate-canvas"></canvas>
+          <!-- Tap markers get appended here -->
 
-        <div class="calibrate-hud">
-          <div class="calibrate-step" id="calibrate-step-label">Step 1 of 3</div>
-          <div class="calibrate-instruction" id="calibrate-instruction">Tap the white reference area on the printed
-            scale</div>
-        </div>
-
-        <div class="calibrate-bottom-bar">
-          <div class="calibrate-chips">
-            <div class="calibrate-chip active" id="chip-ref">
-              <span class="chip-dot"></span>
-              <span>White Ref</span>
-              <span class="swatch-preview hidden" id="swatch-ref"></span>
-            </div>
-            <div class="calibrate-chip" id="chip-strip">
-              <span class="chip-dot"></span>
-              <span>Exposure</span>
-              <span class="swatch-preview hidden" id="swatch-strip"></span>
-            </div>
-            <div class="calibrate-chip" id="chip-expiry">
-              <span class="chip-dot"></span>
-              <span>Expiry</span>
-              <span class="swatch-preview hidden" id="swatch-expiry"></span>
-            </div>
+          <div class="calibrate-hud">
+            <div class="calibrate-step" id="calibrate-step-label">Step 1 of 3</div>
+            <div class="calibrate-instruction" id="calibrate-instruction">Tap the white reference area on the printed
+              scale</div>
           </div>
-          <div class="calibrate-actions">
-            <button id="btn-calibrate-back" class="btn btn-secondary btn-sm">← Retake</button>
-            <button id="btn-calibrate-undo" class="btn btn-secondary btn-sm" disabled>Undo</button>
-            <button id="btn-calibrate-confirm" class="btn btn-primary btn-sm" disabled>Analyze →</button>
+
+          <div class="calibrate-bottom-bar">
+            <div class="calibrate-chips">
+              <div class="calibrate-chip active" id="chip-ref">
+                <span class="chip-dot"></span>
+                <span>White Ref</span>
+                <span class="swatch-preview hidden" id="swatch-ref"></span>
+              </div>
+              <div class="calibrate-chip" id="chip-strip">
+                <span class="chip-dot"></span>
+                <span>Exposure</span>
+                <span class="swatch-preview hidden" id="swatch-strip"></span>
+              </div>
+              <div class="calibrate-chip" id="chip-expiry">
+                <span class="chip-dot"></span>
+                <span>Expiry</span>
+                <span class="swatch-preview hidden" id="swatch-expiry"></span>
+              </div>
+            </div>
+            <div class="calibrate-actions">
+              <button id="btn-calibrate-back" class="btn btn-secondary btn-sm">← Retake</button>
+              <button id="btn-calibrate-undo" class="btn btn-secondary btn-sm" disabled>Undo</button>
+              <button id="btn-calibrate-confirm" class="btn btn-primary btn-sm" disabled>Analyze →</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1742,20 +2257,22 @@
 
     <!-- ──────────── VIEW 4: Processing ──────────── -->
     <div id="view-processing" class="view">
-      <div class="processing-spinner"></div>
-      <h2>Analyzing Badge</h2>
-      <div class="processing-steps">
-        <div class="processing-step active" id="proc-step-1">
-          <span class="step-icon">◌</span>
-          <span>Correcting for ambient lighting…</span>
-        </div>
-        <div class="processing-step" id="proc-step-2">
-          <span class="step-icon">◌</span>
-          <span>Estimating H₂S dose range…</span>
-        </div>
-        <div class="processing-step" id="proc-step-3">
-          <span class="step-icon">◌</span>
-          <span>Checking badge expiry…</span>
+      <div class="glass-card processing-card">
+        <div class="processing-spinner"></div>
+        <h2>Analyzing Badge</h2>
+        <div class="processing-steps">
+          <div class="processing-step active" id="proc-step-1">
+            <span class="step-icon">◌</span>
+            <span>Correcting for ambient lighting…</span>
+          </div>
+          <div class="processing-step" id="proc-step-2">
+            <span class="step-icon">◌</span>
+            <span>Estimating H₂S dose range…</span>
+          </div>
+          <div class="processing-step" id="proc-step-3">
+            <span class="step-icon">◌</span>
+            <span>Checking badge expiry…</span>
+          </div>
         </div>
       </div>
     </div>
@@ -1767,37 +2284,43 @@
         <p class="text-dim" style="font-size:0.85rem;" id="result-datetime">—</p>
       </div>
 
-      <div class="glass-card dose-card">
-        <div class="dose-label">Estimated Cumulative Exposure</div>
-        <div class="dose-value" id="result-dose-range">—</div>
-        <div class="dose-unit">ppm·h</div>
+      <div class="results-layout">
+        <div class="results-col-primary">
+          <div class="glass-card dose-card">
+            <div class="dose-label">Estimated Cumulative Exposure</div>
+            <div class="dose-value" id="result-dose-range">—</div>
+            <div class="dose-unit">ppm·h</div>
 
-        <div class="risk-bar">
-          <div class="risk-track">
-            <div class="risk-indicator" id="risk-indicator" style="left: 0%;"></div>
-          </div>
-          <div class="risk-labels">
-            <span>Safe</span>
-            <span>Caution</span>
-            <span>Danger</span>
+            <div class="risk-bar">
+              <div class="risk-track">
+                <div class="risk-indicator" id="risk-indicator" style="left: 0%;"></div>
+              </div>
+              <div class="risk-labels">
+                <span>Safe</span>
+                <span>Caution</span>
+                <span>Danger</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="glass-card validity-card">
-        <div class="validity-icon" id="validity-icon">—</div>
-        <div class="validity-text">
-          <h3 id="validity-title">Badge Status</h3>
-          <p id="validity-desc">—</p>
-        </div>
-      </div>
+        <div class="results-col-secondary">
+          <div class="glass-card validity-card">
+            <div class="validity-icon" id="validity-icon">—</div>
+            <div class="validity-text">
+              <h3 id="validity-title">Badge Status</h3>
+              <p id="validity-desc">—</p>
+            </div>
+          </div>
 
-      <div class="glass-card">
-        <div class="label"
-          style="font-family:var(--font-mono);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;opacity:0.5;margin-bottom:10px;">
-          Sampled Colors</div>
-        <div class="color-samples" id="color-samples">
-          <!-- populated by JS -->
+          <div class="glass-card samples-card">
+            <div class="label"
+              style="font-family:var(--font-mono);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;opacity:0.5;margin-bottom:10px;">
+              Sampled Colors</div>
+            <div class="color-samples" id="color-samples">
+              <!-- populated by JS -->
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1810,7 +2333,10 @@
     <!-- ──────────── VIEW 6: History ──────────── -->
     <div id="view-history" class="view">
       <div class="history-toolbar">
-        <h2>Reading History</h2>
+        <div>
+          <h2>Reading History</h2>
+          <p class="view-subtitle">Logged dosimeter scans and cumulative worker exposure profiles</p>
+        </div>
         <button id="btn-export-csv" class="btn btn-secondary btn-sm">Export CSV</button>
       </div>
 
@@ -1829,68 +2355,74 @@
     <!-- ──────────── VIEW 7: Experiments Dashboard ──────────── -->
     <div id="view-experiments" class="view">
       <div class="exp-toolbar">
-        <h2>Experiments</h2>
+        <div>
+          <h2>Experiments</h2>
+          <p class="view-subtitle">
+            Controlled-exposure test runs used to build and validate the calibration table.
+          </p>
+        </div>
         <button id="btn-exp-export-csv" class="btn btn-secondary btn-sm">Export CSV</button>
       </div>
-      <p style="font-size: 0.78rem; opacity: 0.55; margin-top: -8px;">
-        Controlled-exposure test runs used to build and validate the calibration table — separate
-        from worker field readings in History.
-      </p>
 
       <button id="btn-exp-add-toggle" class="btn btn-primary btn-block btn-sm">+ Log new experiment</button>
 
-      <div id="exp-form-card" class="glass-card exp-form hidden">
-        <div class="exp-form-grid">
-          <div class="input-group">
-            <label for="exp-batch">Strip batch ID</label>
-            <input id="exp-batch" class="input-field" type="text" placeholder="e.g. BATCH-03">
+      <div class="experiments-layout">
+        <div class="experiments-col-form">
+          <div id="exp-form-card" class="glass-card exp-form hidden">
+            <div class="exp-form-grid">
+              <div class="input-group">
+                <label for="exp-batch">Strip batch ID</label>
+                <input id="exp-batch" class="input-field" type="text" placeholder="e.g. BATCH-03">
+              </div>
+              <div class="input-group">
+                <label for="exp-target-ppmh">Target dose (ppm·h)</label>
+                <input id="exp-target-ppmh" class="input-field" type="number" step="0.1" placeholder="e.g. 20">
+              </div>
+              <div class="input-group">
+                <label for="exp-duration">Exposure duration (h)</label>
+                <input id="exp-duration" class="input-field" type="number" step="0.1" placeholder="e.g. 4">
+              </div>
+              <div class="input-group">
+                <label for="exp-conc">Chamber conc. (ppm)</label>
+                <input id="exp-conc" class="input-field" type="number" step="0.1" placeholder="e.g. 5">
+              </div>
+              <div class="input-group">
+                <label for="exp-temp">Chamber temp (°C)</label>
+                <input id="exp-temp" class="input-field" type="number" step="0.5" placeholder="e.g. 30">
+              </div>
+              <div class="input-group">
+                <label for="exp-rh">Chamber RH (%)</label>
+                <input id="exp-rh" class="input-field" type="number" step="1" placeholder="e.g. 60">
+              </div>
+              <div class="input-group">
+                <label for="exp-rgb">Measured strip color (R,G,B)</label>
+                <input id="exp-rgb" class="input-field" type="text" placeholder="e.g. 160,130,100">
+              </div>
+              <div class="input-group">
+                <label for="exp-operator">Operator</label>
+                <input id="exp-operator" class="input-field" type="text" placeholder="Initials">
+              </div>
+              <div class="input-group span-2">
+                <label for="exp-notes">Notes</label>
+                <input id="exp-notes" class="input-field" type="text" placeholder="Anything unusual about this run">
+              </div>
+            </div>
+            <button id="btn-exp-save" class="btn btn-primary btn-block">Save experiment</button>
           </div>
-          <div class="input-group">
-            <label for="exp-target-ppmh">Target dose (ppm·h)</label>
-            <input id="exp-target-ppmh" class="input-field" type="number" step="0.1" placeholder="e.g. 20">
-          </div>
-          <div class="input-group">
-            <label for="exp-duration">Exposure duration (h)</label>
-            <input id="exp-duration" class="input-field" type="number" step="0.1" placeholder="e.g. 4">
-          </div>
-          <div class="input-group">
-            <label for="exp-conc">Chamber conc. (ppm)</label>
-            <input id="exp-conc" class="input-field" type="number" step="0.1" placeholder="e.g. 5">
-          </div>
-          <div class="input-group">
-            <label for="exp-temp">Chamber temp (°C)</label>
-            <input id="exp-temp" class="input-field" type="number" step="0.5" placeholder="e.g. 30">
-          </div>
-          <div class="input-group">
-            <label for="exp-rh">Chamber RH (%)</label>
-            <input id="exp-rh" class="input-field" type="number" step="1" placeholder="e.g. 60">
-          </div>
-          <div class="input-group">
-            <label for="exp-rgb">Measured strip color (R,G,B)</label>
-            <input id="exp-rgb" class="input-field" type="text" placeholder="e.g. 160,130,100">
-          </div>
-          <div class="input-group">
-            <label for="exp-operator">Operator</label>
-            <input id="exp-operator" class="input-field" type="text" placeholder="Initials">
-          </div>
-          <div class="input-group span-2">
-            <label for="exp-notes">Notes</label>
-            <input id="exp-notes" class="input-field" type="text" placeholder="Anything unusual about this run">
+
+          <div class="exp-chart-wrap">
+            <canvas id="exp-chart" width="360" height="180"></canvas>
+            <div class="chart-caption">Darkness signal vs. target dose — should trend monotonically if the calibration curve is behaving.</div>
           </div>
         </div>
-        <button id="btn-exp-save" class="btn btn-primary btn-block">Save experiment</button>
-      </div>
 
-      <div class="exp-chart-wrap">
-        <canvas id="exp-chart" width="360" height="180"></canvas>
-        <div class="chart-caption">Darkness signal vs. target dose — should trend monotonically if the calibration curve
-          is behaving.</div>
-      </div>
-
-      <div class="exp-list" id="exp-list">
-        <div class="exp-empty" id="exp-empty">
-          <div class="empty-icon">🧪</div>
-          <p>No experiments logged yet.</p>
+        <div class="experiments-col-list">
+          <div class="exp-list" id="exp-list">
+            <div class="exp-empty" id="exp-empty">
+              <div class="empty-icon">🧪</div>
+              <p>No experiments logged yet.</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1912,14 +2444,20 @@
         <button id="btn-admin-close" class="admin-close-btn" aria-label="Close admin portal">✕</button>
       </div>
 
-      <!-- Segmented Navigation Tabs -->
-      <div class="admin-tabs" role="tablist">
-        <button id="tab-workers" class="admin-tab active" data-tab="workers" role="tab" aria-selected="true">Worker Profiles</button>
-        <button id="tab-badges" class="admin-tab" data-tab="badges" role="tab" aria-selected="false">Badge Records</button>
-        <button id="tab-diagnostics" class="admin-tab" data-tab="diagnostics" role="tab" aria-selected="false">
-          <span class="tab-line">Quality</span>
-          <span class="tab-line">Diagnostics</span>
-        </button>
+      <!-- Segmented Navigation Tabs & Search -->
+      <div class="admin-controls-bar">
+        <div class="admin-tabs" role="tablist">
+          <button id="tab-workers" class="admin-tab active" data-tab="workers" role="tab" aria-selected="true">Worker Profiles</button>
+          <button id="tab-badges" class="admin-tab" data-tab="badges" role="tab" aria-selected="false">Badge Records</button>
+          <button id="tab-diagnostics" class="admin-tab" data-tab="diagnostics" role="tab" aria-selected="false">
+            <span class="tab-line">Quality Diagnostics</span>
+          </button>
+        </div>
+
+        <!-- Search Field -->
+        <div class="admin-search-box">
+          <input id="admin-search-input" class="admin-search-input" type="text" placeholder="Search worker ID or shift" autocomplete="off">
+        </div>
       </div>
 
       <!-- 2x2 Telemetry Metric Cards -->
@@ -1947,11 +2485,6 @@
           <div class="metric-val text-coral" id="admin-stat-expiry">0 Expired</div>
           <div class="metric-sub" id="admin-stat-expiry-sub">Requires immediate replacement</div>
         </div>
-      </div>
-
-      <!-- Search Field -->
-      <div class="admin-search-box">
-        <input id="admin-search-input" class="admin-search-input" type="text" placeholder="Search worker ID or shift" autocomplete="off">
       </div>
 
       <!-- Tab 1: Worker Profiles -->

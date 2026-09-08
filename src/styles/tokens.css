@@ -25,6 +25,15 @@
       --radius-lg: 22px;
       --radius-full: 9999px;
 
+      --container-sm: 440px;
+      --container-md: 768px;
+      --container-lg: 1060px;
+      --container-xl: 1200px;
+
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+
       --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
       --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
