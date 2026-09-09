@@ -90,36 +90,10 @@
       z-index: 0;
     }
 
-    /* ================================================================
-       PLACEHOLDER DATA WARNING BANNER
-       ================================================================ */
-    #warning-banner {
-      position: sticky;
-      top: 0;
-      left: 0;
-      right: 0;
-      width: 100%;
-      z-index: 1000;
-      background: linear-gradient(135deg, var(--amber-deep), var(--amber));
-      color: var(--ink);
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      font-weight: 600;
-      text-align: center;
-      padding: 7px 16px;
-      letter-spacing: 0.02em;
-      line-height: 1.35;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-    }
-
-    #warning-banner .warning-icon {
-      margin-right: 4px;
-    }
-
     #app {
       position: relative;
       z-index: 1;
-      min-height: calc(100dvh - 36px);
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       width: 100%;
@@ -2104,13 +2078,6 @@
 
 <body>
 
-  <!-- ============================================================
-       PLACEHOLDER DATA WARNING — always visible, non-dismissible
-       ============================================================ -->
-  <div id="warning-banner">
-    <span class="warning-icon">⚠</span>
-    Calibration data is placeholder — not from lab measurements. Do not use for real safety decisions.
-  </div>
 
   <!-- ============================================================
        APP SHELL
