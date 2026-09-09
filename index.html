@@ -295,16 +295,17 @@
     <!-- ──────────── VIEW 7: Experiments Dashboard ──────────── -->
     <div id="view-experiments" class="view">
       <div class="exp-toolbar">
-        <div>
+        <div class="exp-toolbar-info">
           <h2>Experiments</h2>
           <p class="view-subtitle">
             Controlled-exposure test runs used to build and validate the calibration table.
           </p>
         </div>
-        <button id="btn-exp-export-csv" class="btn btn-secondary btn-sm">Export CSV</button>
+        <div class="exp-toolbar-actions">
+          <button id="btn-exp-add-toggle" class="btn btn-primary btn-sm">+ Log new experiment</button>
+          <button id="btn-exp-export-csv" class="btn btn-secondary btn-sm">Export CSV</button>
+        </div>
       </div>
-
-      <button id="btn-exp-add-toggle" class="btn btn-primary btn-block btn-sm">+ Log new experiment</button>
 
       <div class="experiments-layout">
         <div class="experiments-col-form">

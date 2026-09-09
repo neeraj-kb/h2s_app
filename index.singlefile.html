@@ -1535,13 +1535,30 @@
 
     .exp-toolbar {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
-      gap: 8px;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
-    .exp-toolbar h2 {
+    .exp-toolbar-info {
       flex: 1;
+      min-width: 240px;
+    }
+
+    .exp-toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    #btn-exp-add-toggle,
+    #btn-exp-export-csv {
+      padding: 7px 14px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      white-space: nowrap;
     }
 
     .exp-form {
@@ -1561,6 +1578,11 @@
     }
 
     @media (max-width: 540px) {
+      .exp-toolbar-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
       .exp-form-grid {
         grid-template-columns: 1fr;
         gap: 12px;
@@ -1575,7 +1597,9 @@
       background: var(--ink-soft);
       border: 1px solid var(--glass-border);
       border-radius: var(--radius-md);
-      padding: 12px;
+      padding: 14px 16px 10px;
+      max-width: 440px;
+      width: 100%;
     }
 
     .exp-chart-wrap .chart-caption {
@@ -1588,7 +1612,7 @@
 
     #exp-chart {
       width: 100%;
-      height: auto;
+      height: 150px;
       display: block;
     }
 
@@ -2355,16 +2379,17 @@
     <!-- ──────────── VIEW 7: Experiments Dashboard ──────────── -->
     <div id="view-experiments" class="view">
       <div class="exp-toolbar">
-        <div>
+        <div class="exp-toolbar-info">
           <h2>Experiments</h2>
           <p class="view-subtitle">
             Controlled-exposure test runs used to build and validate the calibration table.
           </p>
         </div>
-        <button id="btn-exp-export-csv" class="btn btn-secondary btn-sm">Export CSV</button>
+        <div class="exp-toolbar-actions">
+          <button id="btn-exp-add-toggle" class="btn btn-primary btn-sm">+ Log new experiment</button>
+          <button id="btn-exp-export-csv" class="btn btn-secondary btn-sm">Export CSV</button>
+        </div>
       </div>
-
-      <button id="btn-exp-add-toggle" class="btn btn-primary btn-block btn-sm">+ Log new experiment</button>
 
       <div class="experiments-layout">
         <div class="experiments-col-form">
@@ -3453,34 +3478,79 @@
       }
 
       function drawExperimentsChart(experiments) {
+        if (!expChartCanvas) return;
         const ctx = expChartCanvas.getContext('2d');
-        const w = expChartCanvas.width, h = expChartCanvas.height;
-        const pad = 28;
+        if (!ctx) return;
+
+        const rect = expChartCanvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const displayWidth = Math.round(rect.width) || expChartCanvas.width || 360;
+        const displayHeight = Math.round(rect.height) || expChartCanvas.height || 150;
+
+        if (expChartCanvas.width !== displayWidth * dpr || expChartCanvas.height !== displayHeight * dpr) {
+          expChartCanvas.width = displayWidth * dpr;
+          expChartCanvas.height = displayHeight * dpr;
+        }
+
+        ctx.save();
+        ctx.scale(dpr, dpr);
+
+        const w = displayWidth;
+        const h = displayHeight;
+        const padLeft = 40;
+        const padBottom = 26;
+        const padTop = 22;
+        const padRight = 16;
+
         ctx.clearRect(0, 0, w, h);
 
         // Axes
-        ctx.strokeStyle = 'rgba(242,239,230,0.2)';
+        ctx.strokeStyle = 'rgba(242,239,230,0.18)';
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(pad, 8); ctx.lineTo(pad, h - pad); ctx.lineTo(w - 8, h - pad);
+        ctx.moveTo(padLeft, padTop);
+        ctx.lineTo(padLeft, h - padBottom);
+        ctx.lineTo(w - padRight, h - padBottom);
         ctx.stroke();
 
-        ctx.fillStyle = 'rgba(242,239,230,0.4)';
+        // Labels & Ticks
+        ctx.fillStyle = 'rgba(242,239,230,0.45)';
         ctx.font = '9px monospace';
-        ctx.fillText('darkness', 2, 14);
-        ctx.fillText('dose (ppm·h) →', w - 100, h - 8);
 
-        if (experiments.length === 0) return;
+        // Y-axis title placed cleanly above Y-axis
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('Darkness', padLeft, padTop - 5);
+
+        // X-axis title placed at right
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'top';
+        ctx.fillText('Dose (ppm·h) →', w - padRight, h - padBottom + 6);
+
+        // Tick marks on Y axis
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('255', padLeft - 6, padTop + 2);
+        ctx.fillText('0', padLeft - 6, h - padBottom);
+
+        if (!experiments || experiments.length === 0) {
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = 'rgba(242,239,230,0.2)';
+          ctx.fillText('No data points yet', padLeft + (w - padLeft - padRight) / 2, padTop + (h - padTop - padBottom) / 2);
+          ctx.restore();
+          return;
+        }
 
         const maxDose = Math.max(...experiments.map(e => e.targetPpmH), 1);
         const maxDarkness = 255;
 
-        const toX = v => pad + (v / maxDose) * (w - pad - 16);
-        const toY = v => (h - pad) - (v / maxDarkness) * (h - pad - 16);
+        const toX = v => padLeft + (v / maxDose) * (w - padLeft - padRight - 8);
+        const toY = v => (h - padBottom) - (v / maxDarkness) * (h - padBottom - padTop);
 
         // Sort by dose for a connecting line
         const sorted = [...experiments].sort((a, b) => a.targetPpmH - b.targetPpmH);
-        ctx.strokeStyle = 'rgba(214,154,45,0.5)';
+        ctx.strokeStyle = 'rgba(214,154,45,0.6)';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
         sorted.forEach((e, i) => {

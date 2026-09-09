@@ -307,12 +307,14 @@ btnExperiments.addEventListener('click', async () => {
 
 btnExpBack.addEventListener('click', () => {
   expFormCard.classList.add('hidden');
+  btnExpAddToggle.textContent = '+ Log new experiment';
   showView('welcome');
   refreshLastReading();
 });
 
 btnExpAddToggle.addEventListener('click', () => {
-  expFormCard.classList.toggle('hidden');
+  const isHidden = expFormCard.classList.toggle('hidden');
+  btnExpAddToggle.textContent = isHidden ? '+ Log new experiment' : '✕ Close form';
 });
 
 btnExpSave.addEventListener('click', async () => {
@@ -344,6 +346,7 @@ btnExpSave.addEventListener('click', async () => {
   ['exp-batch', 'exp-target-ppmh', 'exp-duration', 'exp-conc', 'exp-temp', 'exp-rh', 'exp-rgb', 'exp-operator', 'exp-notes']
     .forEach(id => { $('#' + id).value = ''; });
   expFormCard.classList.add('hidden');
+  btnExpAddToggle.textContent = '+ Log new experiment';
 
   await refreshExperimentsView();
 });
