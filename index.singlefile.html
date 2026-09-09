@@ -989,7 +989,7 @@
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    /* Tap marker drawn on canvas overlay */
+    /* Tap marker drawn on canvas overlay - interactive & draggable */
     .tap-marker {
       position: absolute;
       width: 44px;
@@ -998,7 +998,26 @@
       border: 2px solid var(--amber);
       transform: translate(-50%, -50%) scale(0);
       animation: tapMarkerIn 0.35s var(--ease-spring) forwards;
-      pointer-events: none;
+      pointer-events: auto;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      z-index: 20;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .tap-marker:hover {
+      border-color: #fff;
+      box-shadow: 0 0 12px var(--amber-glow);
+    }
+
+    .tap-marker.dragging {
+      cursor: grabbing;
+      transform: translate(-50%, -50%) scale(1.18) !important;
+      border-color: #fff;
+      box-shadow: 0 0 20px rgba(214, 154, 45, 0.8), 0 0 0 4px rgba(255, 255, 255, 0.3);
+      z-index: 50;
+      transition: transform 0.08s ease-out;
     }
 
     .tap-marker .marker-num {
@@ -1016,6 +1035,51 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+
+    .auto-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(214, 154, 45, 0.25);
+      border: 1px solid var(--amber);
+      color: #ffd580;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .calibrate-countdown-bar {
+      margin-top: 8px;
+      width: 100%;
+      max-width: 260px;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .calibrate-countdown-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--amber);
+      border-radius: 2px;
+      transition: width 0.1s linear;
+    }
+
+    #btn-calibrate-autodetect {
+      border-color: rgba(214, 154, 45, 0.4);
+      color: var(--paper);
+    }
+
+    #btn-calibrate-autodetect:hover {
+      background: rgba(214, 154, 45, 0.2);
+      border-color: var(--amber);
     }
 
     @keyframes tapMarkerIn {
@@ -2214,23 +2278,25 @@
 
           <div class="calibrate-hud">
             <div class="calibrate-step" id="calibrate-step-label">Step 1 of 3</div>
-            <div class="calibrate-instruction" id="calibrate-instruction">Tap the white reference area on the printed
-              scale</div>
+            <div class="calibrate-instruction" id="calibrate-instruction">Tap the white reference area on the printed scale</div>
+            <div class="calibrate-countdown-bar hidden" id="calibrate-countdown-bar">
+              <div class="calibrate-countdown-fill" id="calibrate-countdown-fill"></div>
+            </div>
           </div>
 
           <div class="calibrate-bottom-bar">
             <div class="calibrate-chips">
-              <div class="calibrate-chip active" id="chip-ref">
+              <div class="calibrate-chip active" id="chip-ref" title="White Reference: Drag marker 1 to adjust">
                 <span class="chip-dot"></span>
                 <span>White Ref</span>
                 <span class="swatch-preview hidden" id="swatch-ref"></span>
               </div>
-              <div class="calibrate-chip" id="chip-strip">
+              <div class="calibrate-chip" id="chip-strip" title="Exposure Strip: Drag marker 2 to adjust">
                 <span class="chip-dot"></span>
                 <span>Exposure</span>
                 <span class="swatch-preview hidden" id="swatch-strip"></span>
               </div>
-              <div class="calibrate-chip" id="chip-expiry">
+              <div class="calibrate-chip" id="chip-expiry" title="Expiry Patch: Drag marker 3 to adjust">
                 <span class="chip-dot"></span>
                 <span>Expiry</span>
                 <span class="swatch-preview hidden" id="swatch-expiry"></span>
@@ -2238,7 +2304,8 @@
             </div>
             <div class="calibrate-actions">
               <button id="btn-calibrate-back" class="btn btn-secondary btn-sm">← Retake</button>
-              <button id="btn-calibrate-undo" class="btn btn-secondary btn-sm" disabled>Undo</button>
+              <button id="btn-calibrate-autodetect" class="btn btn-secondary btn-sm" title="Re-detect 3 points automatically">⚡ Auto-Detect</button>
+              <button id="btn-calibrate-undo" class="btn btn-secondary btn-sm" disabled>Reset</button>
               <button id="btn-calibrate-confirm" class="btn btn-primary btn-sm" disabled>Analyze →</button>
             </div>
           </div>
@@ -3006,41 +3073,91 @@
         showView('welcome');
       });
 
+      // -- Elements --
+      const btnCalAutoDetect = $('#btn-calibrate-autodetect');
+      const calibrateCountdownBar = $('#calibrate-countdown-bar');
+      const calibrateCountdownFill = $('#calibrate-countdown-fill');
+      let isAutoDetected = false;
+      let autoCountdownTimer = null;
+      let activeDragIndex = null;
+
+      function clearCountdown() {
+        if (autoCountdownTimer) {
+          clearInterval(autoCountdownTimer);
+          autoCountdownTimer = null;
+        }
+        if (calibrateCountdownBar) {
+          calibrateCountdownBar.classList.add('hidden');
+        }
+        if (calibrateCountdownFill) {
+          calibrateCountdownFill.style.width = '0%';
+        }
+      }
+
+      function startAutoCountdown(durationMs = 2200) {
+        clearCountdown();
+        if (!calibrateCountdownBar || !calibrateCountdownFill) return;
+
+        calibrateCountdownBar.classList.remove('hidden');
+        calibrateCountdownFill.style.transition = 'none';
+        calibrateCountdownFill.style.width = '0%';
+        calibrateCountdownFill.offsetHeight;
+        calibrateCountdownFill.style.transition = 'width ' + durationMs + 'ms linear';
+        calibrateCountdownFill.style.width = '100%';
+
+        const startTime = Date.now();
+        autoCountdownTimer = setInterval(() => {
+          const elapsed = Date.now() - startTime;
+          const remaining = Math.max(0, durationMs - elapsed);
+          const sec = Math.ceil(remaining / 1000);
+          updateCalibrateUI(sec);
+
+          if (remaining <= 0) {
+            clearCountdown();
+            showView('processing');
+            runAnalysis();
+          }
+        }, 120);
+      }
+
       // -- Capture --
       btnCapture.addEventListener('click', () => {
         captureFrame(videoEl, calibrateCanvas);
         stopCamera(currentStream);
         currentStream = null;
-        resetCalibration();
         showView('calibrate');
-        fitCanvasToWrap();
+        autoPickupPoints();
       });
 
       // -- Calibrate --
-      function fitCanvasToWrap() {
-        // Canvas already has the captured image at native resolution.
-        // CSS will scale it to fit via width:100% + object-fit:contain,
-        // but we need the canvas element dimensions to match the wrap
-        // for proper tap coordinate mapping.
-      }
-
       function resetCalibration() {
+        clearCountdown();
         calibrateStep = 0;
+        isAutoDetected = false;
         sampledColors = [null, null, null];
         tapMarkers.forEach(m => m.remove());
         tapMarkers = [];
         updateCalibrateUI();
       }
 
-      function updateCalibrateUI() {
-        // Update HUD text
-        if (calibrateStep < 3) {
+      function updateCalibrateUI(countdownSec) {
+        const stepLabel = $('#calibrate-step-label');
+        const instruction = $('#calibrate-instruction');
+
+        if (isAutoDetected) {
+          stepLabel.innerHTML = '<span class="auto-badge">⚡ Auto-Detected</span> 3 Points Picked';
+          if (countdownSec !== undefined && countdownSec !== null && countdownSec > 0) {
+            instruction.textContent = 'Auto-analyzing in ' + countdownSec + 's… Confirm or drag markers to adjust';
+          } else {
+            instruction.textContent = 'Points picked automatically. Drag markers to fine-tune or click Analyze →';
+          }
+        } else if (calibrateStep < 3) {
           const info = CALIBRATE_LABELS[calibrateStep];
-          $('#calibrate-step-label').textContent = info.step;
-          $('#calibrate-instruction').textContent = info.instruction;
+          stepLabel.textContent = info.step;
+          instruction.textContent = info.instruction;
         } else {
-          $('#calibrate-step-label').textContent = 'All samples taken';
-          $('#calibrate-instruction').textContent = 'Review and confirm, or undo the last tap';
+          stepLabel.textContent = 'All samples taken';
+          instruction.textContent = 'Review and confirm, or drag markers to adjust';
         }
 
         // Update chips
@@ -3061,27 +3178,49 @@
         });
 
         // Buttons
-        btnCalUndo.disabled = calibrateStep === 0;
-        btnCalConfirm.disabled = calibrateStep < 3;
+        btnCalUndo.disabled = calibrateStep === 0 && !isAutoDetected;
+        btnCalConfirm.disabled = calibrateStep < 3 && !isAutoDetected;
+      }
+
+      // Map canvas pixel coordinates to DOM viewport coordinates within container
+      function canvasToDom(canvasX, canvasY) {
+        const rect = calibrateCanvas.getBoundingClientRect();
+        const imgAspect = (calibrateCanvas.width || 1) / (calibrateCanvas.height || 1);
+        const boxAspect = (rect.width || 1) / (rect.height || 1);
+
+        let offsetX = 0, offsetY = 0, renderW = rect.width, renderH = rect.height;
+        if (imgAspect > boxAspect) {
+          renderH = rect.width / imgAspect;
+          offsetY = (rect.height - renderH) / 2;
+        } else {
+          renderW = rect.height * imgAspect;
+          offsetX = (rect.width - renderW) / 2;
+        }
+
+        const normX = calibrateCanvas.width > 0 ? canvasX / calibrateCanvas.width : 0.5;
+        const normY = calibrateCanvas.height > 0 ? canvasY / calibrateCanvas.height : 0.5;
+
+        const domX = normX * renderW + offsetX;
+        const domY = normY * renderH + offsetY;
+
+        return {
+          domX: Math.round(domX),
+          domY: Math.round(domY),
+        };
       }
 
       // Map tap coordinates from DOM to canvas pixel space
       function domToCanvas(e) {
         const rect = calibrateCanvas.getBoundingClientRect();
-        const scaleX = calibrateCanvas.width / rect.width;
-        const scaleY = calibrateCanvas.height / rect.height;
 
-        // object-fit: contain — find actual image area
         const imgAspect = calibrateCanvas.width / calibrateCanvas.height;
         const boxAspect = rect.width / rect.height;
 
         let offsetX = 0, offsetY = 0, renderW = rect.width, renderH = rect.height;
         if (imgAspect > boxAspect) {
-          // image is wider — letterbox top/bottom
           renderH = rect.width / imgAspect;
           offsetY = (rect.height - renderH) / 2;
         } else {
-          // image is taller — pillarbox left/right
           renderW = rect.height * imgAspect;
           offsetX = (rect.width - renderW) / 2;
         }
@@ -3103,43 +3242,225 @@
         };
       }
 
+      function autoDetectPoints(canvas) {
+        const w = canvas.width || 1920;
+        const h = canvas.height || 1080;
+
+        let p1 = { canvasX: Math.round(w * 0.22), canvasY: Math.round(h * 0.70) };
+        let p2 = { canvasX: Math.round(w * 0.50), canvasY: Math.round(h * 0.46) };
+        let p3 = { canvasX: Math.round(w * 0.76), canvasY: Math.round(h * 0.22) };
+
+        try {
+          const ctx = canvas.getContext('2d');
+          if (ctx && w > 20 && h > 20) {
+            const searchBoxW = Math.round(w * 0.16);
+            const searchBoxH = Math.round(h * 0.16);
+            const startX = Math.max(0, p1.canvasX - Math.round(searchBoxW / 2));
+            const startY = Math.max(0, p1.canvasY - Math.round(searchBoxH / 2));
+            const scanW = Math.min(w - startX, searchBoxW);
+            const scanH = Math.min(h - startY, searchBoxH);
+
+            if (scanW > 5 && scanH > 5) {
+              const imgData = ctx.getImageData(startX, startY, scanW, scanH);
+              const data = imgData.data;
+              let bestScore = -Infinity, bestX = p1.canvasX, bestY = p1.canvasY;
+
+              for (let y = 2; y < scanH - 2; y += 2) {
+                for (let x = 2; x < scanW - 2; x += 2) {
+                  const idx = (y * scanW + x) * 4;
+                  const r = data[idx], g = data[idx + 1], b = data[idx + 2];
+                  const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+                  const sat = Math.max(r, g, b) - Math.min(r, g, b);
+                  const score = lum - sat * 2;
+                  if (score > bestScore && lum > 140) {
+                    bestScore = score;
+                    bestX = startX + x;
+                    bestY = startY + y;
+                  }
+                }
+              }
+              if (bestScore > 120) {
+                p1.canvasX = bestX;
+                p1.canvasY = bestY;
+              }
+            }
+          }
+        } catch (e) {}
+
+        const margin = Math.max(12, Math.round(Math.min(w, h) * 0.03));
+        [p1, p2, p3].forEach(p => {
+          p.canvasX = Math.max(margin, Math.min(w - margin, p.canvasX));
+          p.canvasY = Math.max(margin, Math.min(h - margin, p.canvasY));
+        });
+
+        return [p1, p2, p3];
+      }
+
+      function createDraggableMarker(index, canvasX, canvasY, rgb) {
+        const marker = document.createElement('div');
+        marker.className = 'tap-marker';
+        marker.dataset.index = String(index);
+        marker.dataset.canvasX = String(canvasX);
+        marker.dataset.canvasY = String(canvasY);
+
+        const domPt = canvasToDom(canvasX, canvasY);
+        marker.style.left = domPt.domX + 'px';
+        marker.style.top = domPt.domY + 'px';
+        marker.innerHTML = '<span class="marker-num">' + (index + 1) + '</span>';
+        marker.style.backgroundColor = 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ', 0.35)';
+
+        const onPointerDown = (e) => {
+          e.stopPropagation();
+          clearCountdown();
+          activeDragIndex = index;
+          marker.setPointerCapture(e.pointerId);
+          marker.classList.add('dragging');
+        };
+
+        const onPointerMove = (e) => {
+          if (activeDragIndex !== index) return;
+          e.stopPropagation();
+
+          const coords = domToCanvas(e);
+          const w = calibrateCanvas.width || 1920;
+          const h = calibrateCanvas.height || 1080;
+          const margin = 10;
+          const clampedX = Math.max(margin, Math.min(w - margin, coords.canvasX));
+          const clampedY = Math.max(margin, Math.min(h - margin, coords.canvasY));
+
+          marker.dataset.canvasX = String(clampedX);
+          marker.dataset.canvasY = String(clampedY);
+
+          const domCoords = canvasToDom(clampedX, clampedY);
+          marker.style.left = domCoords.domX + 'px';
+          marker.style.top = domCoords.domY + 'px';
+
+          const sampleRadius = Math.max(10, Math.min(w, h) * 0.025);
+          const newRgb = sampleRegion(calibrateCanvas, clampedX, clampedY, sampleRadius);
+          sampledColors[index] = newRgb;
+          marker.style.backgroundColor = 'rgba(' + newRgb[0] + ',' + newRgb[1] + ',' + newRgb[2] + ', 0.35)';
+
+          const chipInfo = CALIBRATE_LABELS[index];
+          if (chipInfo) {
+            const swatch = $('#' + chipInfo.swatch);
+            if (swatch) {
+              swatch.classList.remove('hidden');
+              swatch.style.background = 'rgb(' + newRgb[0] + ',' + newRgb[1] + ',' + newRgb[2] + ')';
+            }
+          }
+        };
+
+        const onPointerUp = (e) => {
+          if (activeDragIndex === index) {
+            activeDragIndex = null;
+            try { marker.releasePointerCapture(e.pointerId); } catch (err) {}
+            marker.classList.remove('dragging');
+            updateCalibrateUI();
+          }
+        };
+
+        marker.addEventListener('pointerdown', onPointerDown);
+        marker.addEventListener('pointermove', onPointerMove);
+        marker.addEventListener('pointerup', onPointerUp);
+        marker.addEventListener('pointercancel', onPointerUp);
+
+        return marker;
+      }
+
+      function autoPickupPoints() {
+        clearCountdown();
+        tapMarkers.forEach(m => m.remove());
+        tapMarkers = [];
+        isAutoDetected = true;
+
+        const detected = autoDetectPoints(calibrateCanvas);
+        const sampleRadius = Math.max(10, Math.min(calibrateCanvas.width, calibrateCanvas.height) * 0.025);
+
+        detected.forEach((pt, i) => {
+          const rgb = sampleRegion(calibrateCanvas, pt.canvasX, pt.canvasY, sampleRadius);
+          sampledColors[i] = rgb;
+          const marker = createDraggableMarker(i, pt.canvasX, pt.canvasY, rgb);
+          calibrateWrap.appendChild(marker);
+          tapMarkers.push(marker);
+        });
+
+        calibrateStep = 3;
+        updateCalibrateUI(2);
+        startAutoCountdown(2200);
+      }
+
+      window.addEventListener('resize', () => {
+        if (tapMarkers.length === 0) return;
+        tapMarkers.forEach(marker => {
+          const cx = Number(marker.dataset.canvasX);
+          const cy = Number(marker.dataset.canvasY);
+          if (!isNaN(cx) && !isNaN(cy)) {
+            const domPt = canvasToDom(cx, cy);
+            marker.style.left = domPt.domX + 'px';
+            marker.style.top = domPt.domY + 'px';
+          }
+        });
+      });
+
       calibrateWrap.addEventListener('click', (e) => {
-        if (calibrateStep >= 3) return;
-        if (e.target.closest('.calibrate-bottom-bar') || e.target.closest('.calibrate-hud')) return;
+        if (e.target.closest('.calibrate-bottom-bar') || e.target.closest('.calibrate-hud') || e.target.closest('.tap-marker')) {
+          return;
+        }
+        clearCountdown();
 
         const coords = domToCanvas(e);
         if (coords.canvasX < 0 || coords.canvasY < 0 ||
           coords.canvasX > calibrateCanvas.width || coords.canvasY > calibrateCanvas.height) return;
 
-        // Sample pixels
         const sampleRadius = Math.max(10, Math.min(calibrateCanvas.width, calibrateCanvas.height) * 0.025);
         const rgb = sampleRegion(calibrateCanvas, coords.canvasX, coords.canvasY, sampleRadius);
-        sampledColors[calibrateStep] = rgb;
 
-        // Create visual marker
-        const marker = document.createElement('div');
-        marker.className = 'tap-marker';
-        marker.style.left = coords.domX + 'px';
-        marker.style.top = coords.domY + 'px';
-        marker.innerHTML = '<span class="marker-num">' + (calibrateStep + 1) + '</span>';
-        marker.style.backgroundColor = 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ', 0.3)';
-        calibrateWrap.appendChild(marker);
-        tapMarkers.push(marker);
+        if (calibrateStep < 3) {
+          sampledColors[calibrateStep] = rgb;
+          const marker = createDraggableMarker(calibrateStep, coords.canvasX, coords.canvasY, rgb);
+          calibrateWrap.appendChild(marker);
+          tapMarkers.push(marker);
 
-        calibrateStep++;
-        updateCalibrateUI();
+          calibrateStep++;
+          updateCalibrateUI();
+        } else if (tapMarkers.length === 3) {
+          let closestIdx = 0;
+          let minDist = Infinity;
+          tapMarkers.forEach((m, idx) => {
+            const mx = Number(m.dataset.canvasX);
+            const my = Number(m.dataset.canvasY);
+            const dist = (mx - coords.canvasX) ** 2 + (my - coords.canvasY) ** 2;
+            if (dist < minDist) {
+              minDist = dist;
+              closestIdx = idx;
+            }
+          });
+
+          sampledColors[closestIdx] = rgb;
+          const marker = tapMarkers[closestIdx];
+          marker.dataset.canvasX = String(coords.canvasX);
+          marker.dataset.canvasY = String(coords.canvasY);
+          const domPt = canvasToDom(coords.canvasX, coords.canvasY);
+          marker.style.left = domPt.domX + 'px';
+          marker.style.top = domPt.domY + 'px';
+          marker.style.backgroundColor = 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ', 0.35)';
+          updateCalibrateUI();
+        }
       });
 
+      if (btnCalAutoDetect) {
+        btnCalAutoDetect.addEventListener('click', () => {
+          autoPickupPoints();
+        });
+      }
+
       btnCalUndo.addEventListener('click', () => {
-        if (calibrateStep <= 0) return;
-        calibrateStep--;
-        sampledColors[calibrateStep] = null;
-        const marker = tapMarkers.pop();
-        if (marker) marker.remove();
-        updateCalibrateUI();
+        clearCountdown();
+        resetCalibration();
       });
 
       btnCalBack.addEventListener('click', async () => {
+        clearCountdown();
         resetCalibration();
         showView('camera');
         cameraErrorDiv.classList.add('hidden');

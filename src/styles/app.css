@@ -933,7 +933,7 @@
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    /* Tap marker drawn on canvas overlay */
+    /* Tap marker drawn on canvas overlay - interactive & draggable */
     .tap-marker {
       position: absolute;
       width: 44px;
@@ -942,7 +942,26 @@
       border: 2px solid var(--amber);
       transform: translate(-50%, -50%) scale(0);
       animation: tapMarkerIn 0.35s var(--ease-spring) forwards;
-      pointer-events: none;
+      pointer-events: auto;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      z-index: 20;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .tap-marker:hover {
+      border-color: #fff;
+      box-shadow: 0 0 12px var(--amber-glow);
+    }
+
+    .tap-marker.dragging {
+      cursor: grabbing;
+      transform: translate(-50%, -50%) scale(1.18) !important;
+      border-color: #fff;
+      box-shadow: 0 0 20px rgba(214, 154, 45, 0.8), 0 0 0 4px rgba(255, 255, 255, 0.3);
+      z-index: 50;
+      transition: transform 0.08s ease-out;
     }
 
     .tap-marker .marker-num {
@@ -960,6 +979,51 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+
+    .auto-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(214, 154, 45, 0.25);
+      border: 1px solid var(--amber);
+      color: #ffd580;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .calibrate-countdown-bar {
+      margin-top: 8px;
+      width: 100%;
+      max-width: 260px;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .calibrate-countdown-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--amber);
+      border-radius: 2px;
+      transition: width 0.1s linear;
+    }
+
+    #btn-calibrate-autodetect {
+      border-color: rgba(214, 154, 45, 0.4);
+      color: var(--paper);
+    }
+
+    #btn-calibrate-autodetect:hover {
+      background: rgba(214, 154, 45, 0.2);
+      border-color: var(--amber);
     }
 
     @keyframes tapMarkerIn {

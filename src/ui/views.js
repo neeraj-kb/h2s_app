@@ -86,20 +86,29 @@ export function renderLastReading(readings) {
  * Update calibration HUD and step chips.
  * @param {number} step
  * @param {Array<[number, number, number]|null>} sampledColors
+ * @param {boolean} [isAutoPicked=false]
+ * @param {number|null} [countdownSec=null]
  */
-export function updateCalibrateUI(step, sampledColors) {
+export function updateCalibrateUI(step, sampledColors, isAutoPicked = false, countdownSec = null) {
   const stepLabel = $('#calibrate-step-label');
   const instruction = $('#calibrate-instruction');
   const btnUndo = $('#btn-calibrate-undo');
   const btnConfirm = $('#btn-calibrate-confirm');
 
-  if (step < 3) {
+  if (isAutoPicked) {
+    stepLabel.innerHTML = '<span class="auto-badge">⚡ Auto-Detected</span> 3 Points Picked';
+    if (countdownSec !== null && countdownSec > 0) {
+      instruction.textContent = `Auto-analyzing in ${countdownSec}s… Confirm or drag markers to adjust`;
+    } else {
+      instruction.textContent = 'Points picked automatically. Drag markers to fine-tune or click Analyze →';
+    }
+  } else if (step < 3) {
     const info = CALIBRATE_LABELS[step];
     stepLabel.textContent = info.step;
     instruction.textContent = info.instruction;
   } else {
     stepLabel.textContent = 'All samples taken';
-    instruction.textContent = 'Review and confirm, or undo the last tap';
+    instruction.textContent = 'Review and confirm, or drag markers to adjust';
   }
 
   CALIBRATE_LABELS.forEach((info, i) => {
@@ -120,8 +129,8 @@ export function updateCalibrateUI(step, sampledColors) {
     }
   });
 
-  btnUndo.disabled = step === 0;
-  btnConfirm.disabled = step < 3;
+  btnUndo.disabled = step === 0 && !isAutoPicked;
+  btnConfirm.disabled = step < 3 && !isAutoPicked;
 }
 
 /**

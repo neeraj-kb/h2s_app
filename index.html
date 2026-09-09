@@ -156,23 +156,25 @@
 
           <div class="calibrate-hud">
             <div class="calibrate-step" id="calibrate-step-label">Step 1 of 3</div>
-            <div class="calibrate-instruction" id="calibrate-instruction">Tap the white reference area on the printed
-              scale</div>
+            <div class="calibrate-instruction" id="calibrate-instruction">Tap the white reference area on the printed scale</div>
+            <div class="calibrate-countdown-bar hidden" id="calibrate-countdown-bar">
+              <div class="calibrate-countdown-fill" id="calibrate-countdown-fill"></div>
+            </div>
           </div>
 
           <div class="calibrate-bottom-bar">
             <div class="calibrate-chips">
-              <div class="calibrate-chip active" id="chip-ref">
+              <div class="calibrate-chip active" id="chip-ref" title="White Reference: Drag marker 1 to adjust">
                 <span class="chip-dot"></span>
                 <span>White Ref</span>
                 <span class="swatch-preview hidden" id="swatch-ref"></span>
               </div>
-              <div class="calibrate-chip" id="chip-strip">
+              <div class="calibrate-chip" id="chip-strip" title="Exposure Strip: Drag marker 2 to adjust">
                 <span class="chip-dot"></span>
                 <span>Exposure</span>
                 <span class="swatch-preview hidden" id="swatch-strip"></span>
               </div>
-              <div class="calibrate-chip" id="chip-expiry">
+              <div class="calibrate-chip" id="chip-expiry" title="Expiry Patch: Drag marker 3 to adjust">
                 <span class="chip-dot"></span>
                 <span>Expiry</span>
                 <span class="swatch-preview hidden" id="swatch-expiry"></span>
@@ -180,7 +182,8 @@
             </div>
             <div class="calibrate-actions">
               <button id="btn-calibrate-back" class="btn btn-secondary btn-sm">← Retake</button>
-              <button id="btn-calibrate-undo" class="btn btn-secondary btn-sm" disabled>Undo</button>
+              <button id="btn-calibrate-autodetect" class="btn btn-secondary btn-sm" title="Re-detect 3 points automatically">⚡ Auto-Detect</button>
+              <button id="btn-calibrate-undo" class="btn btn-secondary btn-sm" disabled>Reset</button>
               <button id="btn-calibrate-confirm" class="btn btn-primary btn-sm" disabled>Analyze →</button>
             </div>
           </div>

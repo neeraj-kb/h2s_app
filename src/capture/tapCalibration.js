@@ -91,3 +91,41 @@ export function domToCanvas(e, canvas) {
     domY: clientY - rect.top,
   };
 }
+
+/**
+ * Map canvas pixel coordinates to DOM viewport coordinates within the container,
+ * taking object-fit: contain letterboxing/pillarboxing into account.
+ *
+ * @param {number} canvasX
+ * @param {number} canvasY
+ * @param {HTMLCanvasElement} canvas
+ * @returns {{ domX: number, domY: number }}
+ */
+export function canvasToDom(canvasX, canvasY, canvas) {
+  const rect = canvas.getBoundingClientRect();
+
+  const imgAspect = (canvas.width || 1) / (canvas.height || 1);
+  const boxAspect = (rect.width || 1) / (rect.height || 1);
+
+  let offsetX = 0, offsetY = 0, renderW = rect.width, renderH = rect.height;
+  if (imgAspect > boxAspect) {
+    // image is wider — letterbox top/bottom
+    renderH = rect.width / imgAspect;
+    offsetY = (rect.height - renderH) / 2;
+  } else {
+    // image is taller — pillarbox left/right
+    renderW = rect.height * imgAspect;
+    offsetX = (rect.width - renderW) / 2;
+  }
+
+  const normX = canvas.width > 0 ? canvasX / canvas.width : 0.5;
+  const normY = canvas.height > 0 ? canvasY / canvas.height : 0.5;
+
+  const domX = normX * renderW + offsetX;
+  const domY = normY * renderH + offsetY;
+
+  return {
+    domX: Math.round(domX),
+    domY: Math.round(domY),
+  };
+}
