@@ -78,6 +78,7 @@ const calibrateCountdownBar = $('#calibrate-countdown-bar');
 const calibrateCountdownFill = $('#calibrate-countdown-fill');
 
 const btnSaveReading = $('#btn-save-reading');
+const btnAdjustCalibration = $('#btn-adjust-calibration');
 const btnNewReading = $('#btn-new-reading');
 const btnExportCSV = $('#btn-export-csv');
 const btnHistoryBack = $('#btn-history-back');
@@ -349,14 +350,36 @@ window.addEventListener('resize', () => {
   });
 });
 
-// Camera Capture
+// Camera Capture - Automatically fetch all 3 points/colors and run analysis directly
 btnCapture.addEventListener('click', () => {
   captureFrame(videoEl, calibrateCanvas);
   stopCamera(currentStream);
   currentStream = null;
-  showView('calibrate');
-  // Automatically pick up the three calibration points
-  autoPickupPoints();
+
+  // 1. Automatically detect calibration points
+  const detected = autoDetectPoints(calibrateCanvas);
+  const sampleRadius = Math.max(10, Math.min(calibrateCanvas.width, calibrateCanvas.height) * 0.025);
+
+  // 2. Automatically fetch all 3 colors
+  detected.forEach((pt, i) => {
+    sampledColors[i] = sampleRegion(calibrateCanvas, pt.canvasX, pt.canvasY, sampleRadius);
+  });
+
+  // 3. Pre-position markers on canvas in case user inspects/adjusts later
+  tapMarkers.forEach(m => m.remove());
+  tapMarkers = [];
+  detected.forEach((pt, i) => {
+    const marker = createDraggableMarker(i, pt.canvasX, pt.canvasY, sampledColors[i]);
+    calibrateWrap.appendChild(marker);
+    tapMarkers.push(marker);
+  });
+  calibrateStep = 3;
+  isAutoDetected = true;
+  updateCalibrateUI(3, sampledColors, true);
+
+  // 4. Immediately proceed to analysis without asking the user to select colors
+  showView('processing');
+  runAnalysis();
 });
 
 // Calibration Tap/Click Interaction
@@ -380,7 +403,6 @@ calibrateWrap.addEventListener('click', (e) => {
   const rgb = sampleRegion(calibrateCanvas, coords.canvasX, coords.canvasY, sampleRadius);
 
   if (calibrateStep < 3) {
-    // Sequential manual placement if not yet complete
     sampledColors[calibrateStep] = rgb;
     const marker = createDraggableMarker(calibrateStep, coords.canvasX, coords.canvasY, rgb);
     calibrateWrap.appendChild(marker);
@@ -389,7 +411,6 @@ calibrateWrap.addEventListener('click', (e) => {
     calibrateStep++;
     updateCalibrateUI(calibrateStep, sampledColors, false);
   } else if (tapMarkers.length === 3) {
-    // All 3 points placed: move closest marker to tapped position
     let closestIdx = 0;
     let minDist = Infinity;
     tapMarkers.forEach((m, idx) => {
@@ -427,6 +448,10 @@ btnCalUndo.addEventListener('click', () => {
 
 btnCalBack.addEventListener('click', async () => {
   clearCountdown();
+  if (currentResult) {
+    showView('results');
+    return;
+  }
   resetCalibration();
   showView('camera');
   cameraErrorDiv.classList.add('hidden');
@@ -442,6 +467,17 @@ btnCalConfirm.addEventListener('click', () => {
   showView('processing');
   runAnalysis();
 });
+
+if (btnAdjustCalibration) {
+  btnAdjustCalibration.addEventListener('click', () => {
+    showView('calibrate');
+    updateCalibrateUI(3, sampledColors, true);
+    if (btnCalConfirm) {
+      btnCalConfirm.textContent = 'Re-Analyze →';
+      btnCalConfirm.disabled = false;
+    }
+  });
+}
 
 // Results
 btnSaveReading.addEventListener('click', async () => {
@@ -604,14 +640,29 @@ if (btnAdminExportCSV) {
   });
 }
 
-// --- Service Worker Registration ---
+// --- Service Worker Registration & Cache Invalidation ---
 function registerServiceWorker() {
-  if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').catch(err => {
-        console.warn('Service worker registration failed:', err);
+  if ('serviceWorker' in navigator) {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      // In local development, purge stale caches and unregister existing service workers
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        for (const reg of regs) {
+          reg.unregister();
+        }
       });
-    });
+      if ('caches' in window) {
+        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+      }
+      return;
+    }
+
+    if (window.location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => {
+          console.warn('Service worker registration failed:', err);
+        });
+      });
+    }
   }
 }
 

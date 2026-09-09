@@ -2384,6 +2384,7 @@
 
       <div class="result-actions">
         <button id="btn-save-reading" class="btn btn-safe btn-sm">Save Reading</button>
+        <button id="btn-adjust-calibration" class="btn btn-secondary btn-sm">🔍 View / Adjust Points</button>
         <button id="btn-new-reading" class="btn btn-primary btn-sm">New Reading</button>
       </div>
     </div>
@@ -3120,13 +3121,36 @@
         }, 120);
       }
 
-      // -- Capture --
+      // -- Capture: Fetch colors automatically & analyze immediately --
       btnCapture.addEventListener('click', () => {
         captureFrame(videoEl, calibrateCanvas);
         stopCamera(currentStream);
         currentStream = null;
-        showView('calibrate');
-        autoPickupPoints();
+
+        // 1. Automatically detect calibration points
+        const detected = autoDetectPoints(calibrateCanvas);
+        const sampleRadius = Math.max(10, Math.min(calibrateCanvas.width, calibrateCanvas.height) * 0.025);
+
+        // 2. Automatically fetch all 3 colors
+        detected.forEach((pt, i) => {
+          sampledColors[i] = sampleRegion(calibrateCanvas, pt.canvasX, pt.canvasY, sampleRadius);
+        });
+
+        // 3. Pre-populate markers in case user inspects/adjusts later
+        tapMarkers.forEach(m => m.remove());
+        tapMarkers = [];
+        detected.forEach((pt, i) => {
+          const marker = createDraggableMarker(i, pt.canvasX, pt.canvasY, sampledColors[i]);
+          calibrateWrap.appendChild(marker);
+          tapMarkers.push(marker);
+        });
+        calibrateStep = 3;
+        isAutoDetected = true;
+        updateCalibrateUI();
+
+        // 4. Immediately proceed to analysis without asking user to select colors
+        showView('processing');
+        runAnalysis();
       });
 
       // -- Calibrate --
@@ -3461,6 +3485,10 @@
 
       btnCalBack.addEventListener('click', async () => {
         clearCountdown();
+        if (currentResult) {
+          showView('results');
+          return;
+        }
         resetCalibration();
         showView('camera');
         cameraErrorDiv.classList.add('hidden');
@@ -3471,8 +3499,21 @@
         }
       });
 
+      const btnAdjustCalibration = $('#btn-adjust-calibration');
+      if (btnAdjustCalibration) {
+        btnAdjustCalibration.addEventListener('click', () => {
+          showView('calibrate');
+          updateCalibrateUI();
+          if (btnCalConfirm) {
+            btnCalConfirm.textContent = 'Re-Analyze →';
+            btnCalConfirm.disabled = false;
+          }
+        });
+      }
+
       // -- Process & Results --
       btnCalConfirm.addEventListener('click', () => {
+        clearCountdown();
         showView('processing');
         runAnalysis();
       });
